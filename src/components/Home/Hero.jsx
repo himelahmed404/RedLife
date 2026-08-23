@@ -3,6 +3,7 @@
 import React from "react";
 import { Link } from "@heroui/react";
 import { FiArrowRight, FiSearch } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 // ── Dummy Data for the Ward Board ──
 const BOARD_REQUESTS = [
@@ -14,11 +15,15 @@ const BOARD_REQUESTS = [
 
 export default function Hero() {
   return (
-    <section className="w-full max-w-[1200px] mx-auto px-5 py-[56px]">
+    <section className="w-full max-w-[1180px] mx-auto px-5 py-[56px] overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-[44px] items-center">
         
-        {/* Left Side: Copy & CTAs */}
-        <div>
+        {/* Left Side: Copy & CTAs (Simple Fade-Up) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#5C6675] mb-3">
             Bangladesh · 64 districts · 495 upazilas
           </p>
@@ -62,15 +67,18 @@ export default function Hero() {
               <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#5C6675] mt-[6px]">funded by donors</p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Right Side: The Ward Board */}
-        <div className="bg-[#10141C] rounded-[16px] p-[6px] text-white">
-          
+        {/* Right Side: The Ward Board (Simple Fade-Up with slight delay) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-[#10141C] rounded-[16px] p-[6px] text-white"
+        >
           {/* Board Header */}
           <div className="flex items-center justify-between px-[14px] pt-[12px] pb-[10px]">
             <div className="flex items-center gap-2">
-              {/* Pulse Animation */}
               <div className="relative flex h-[7px] w-[7px]">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C1121F] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-[#C1121F]"></span>
@@ -88,18 +96,15 @@ export default function Hero() {
                 href="/donation-requests"
                 className="flex items-center gap-[12px] px-[14px] py-[12px] rounded-[11px] hover:bg-[#1B2230] transition-colors border-t border-white/5 first:border-transparent cursor-pointer"
               >
-                {/* Blood Token (Signature Element) */}
                 <span className="inline-flex flex-col items-center justify-center border-[1.5px] border-white/35 rounded-[9px] bg-transparent text-white font-mono font-[600] relative overflow-hidden flex-none min-w-[44px] h-[34px] text-[14px] pt-[4px] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[4px] before:bg-white/35">
                   <span>{req.bloodGroup}</span>
                 </span>
                 
-                {/* Patient Info */}
                 <div className="min-w-0 flex-1">
                   <p className="text-[13.5px] font-[600] text-white truncate">{req.name}</p>
                   <p className="font-mono text-[12px] text-[#8C97A8] truncate">{req.location}</p>
                 </div>
                 
-                {/* Date/Status */}
                 <span className={`font-mono text-[12px] whitespace-nowrap ${req.dateColor}`}>
                   {req.date}
                 </span>
@@ -117,7 +122,7 @@ export default function Hero() {
             </Link>
           </div>
           
-        </div>
+        </motion.div>
       </div>
     </section>
   );
