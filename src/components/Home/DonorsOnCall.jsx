@@ -58,7 +58,7 @@ export default function DonorGroups() {
           <Link
             key={item.group}
             href="/search"
-            className="block bg-white border border-[#E4E8ED] hover:border-[#C1121F] rounded-[14px] p-5 w-full text-center transition-colors cursor-pointer"
+            className="block bg-white border border-[#E4E8ED] hover:border-[#C1121F] rounded-[14px] p-5 w-full transition-colors cursor-pointer"
           >
             {/* Medium Blood Token */}
             <span className="inline-flex flex-col items-center justify-center border-[1.5px] border-[#C1121F] rounded-[9px] bg-white text-[#C1121F] font-mono font-[600] relative overflow-hidden flex-none min-w-[60px] h-[48px] text-[19px] pt-[4px] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[4px] before:bg-[#C1121F]">
