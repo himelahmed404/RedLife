@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { Link } from "@heroui/react";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client"; // Adjust path if necessary
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
+  const Router = useRouter();
 
   // ── Form Submission Handler ──
   const handleSubmit = async (e) => {
@@ -27,6 +29,7 @@ export default function Login() {
       alert(error.message); 
     } else {
       console.log("Login successful!", data);
+      Router.push("/dashboard"); 
     }
 
     setIsLoading(false);

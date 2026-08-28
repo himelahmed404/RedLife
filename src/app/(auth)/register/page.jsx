@@ -9,9 +9,12 @@ import { motion } from "framer-motion";
 import rawDistricts from "@/lib/asset/data/districts.json";
 import rawUpazilas from "@/lib/asset/data/upazilas.json";
 import { authClient } from "@/lib/auth-client"; 
+import Image from "next/image";
+import { BsEye } from "react-icons/bs";
 
 // Extract the actual arrays
-const districtsData = rawDistricts[2].data;
+const districtsDataRaw = rawDistricts[2].data;
+const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.name)); 
 const allUpazilasData = rawUpazilas[2].data;
 
 export default function Register() {
@@ -64,6 +67,7 @@ export default function Register() {
     }
   };
 
+  
   // ── Final Form Submission Handler ──
   const handelSubmit = async (e) => {
     e.preventDefault();
@@ -72,12 +76,26 @@ export default function Register() {
     const Data = new FormData(e.target);
     const FullData = Object.fromEntries(Data.entries());
 
+    if(FullData.password !== FullData.confirmPassword) {
+      alert("Passwords do not match!");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!avatarUrl) {
+      alert("Please upload an avatar image.");
+      setIsSubmitting(false);
+      return;
+    }
+
     // Call better-auth sign up directly using the pre-uploaded avatarUrl
     const { data, error } = await authClient.signUp.email({
       name: FullData.name, 
       email: FullData.email, 
       password: FullData.password, 
       image: avatarUrl, // Uses the URL generated during file selection
+      Role: "donor",
+      isActive: true,
       callbackURL: "/",
     });
 
@@ -147,7 +165,7 @@ export default function Register() {
                   {isUploadingImage ? (
                     <div className="w-[18px] h-[18px] border-[2px] border-[#C1121F] border-t-transparent rounded-full animate-spin"></div>
                   ) : avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <Image src={avatarUrl} alt="Avatar" width={100} height={100} className="w-full h-full object-cover" />
                   ) : (
                     <FiUser className="text-[18px]" />
                   )}
@@ -223,19 +241,22 @@ export default function Register() {
             {/* Password */}
             <div>
               <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Password</label>
-              <input 
-                name="password" 
-                type="password" 
-                placeholder="At least 6 characters" 
-                required
-                minLength={6}
-                className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-              />
+              
+                <input 
+                  name="password" 
+                  type="password" 
+                  placeholder="At least 6 characters" 
+                  required
+                  minLength={6}
+                  className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
+                />
+              
             </div>
-
+            
             {/* Confirm Password */}
             <div>
               <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Confirm password</label>
+              
               <input 
                 name="confirmPassword" 
                 type="password" 
@@ -243,6 +264,10 @@ export default function Register() {
                 required
                 className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
               />
+            
+            </div>
+            <div className="hidden sm:block">
+                <input type ></input>
             </div>
 
             {/* Submit Button */}
