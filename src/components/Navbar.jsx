@@ -12,7 +12,7 @@ import Image from "next/image";
 const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "Donation requests", href: "/donation-requests" },
-    { label: "Search Donors", href: "/search-donors" }
+    { label: "Funding", href: "/funding" }
 ];
 
 export default function AppNavbar() {

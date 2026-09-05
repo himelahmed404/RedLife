@@ -10,7 +10,7 @@ import rawDistricts from "@/lib/asset/data/districts.json";
 import rawUpazilas from "@/lib/asset/data/upazilas.json";
 import { authClient } from "@/lib/auth-client"; 
 import Image from "next/image";
-import { BsEye } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 
 // Extract the actual arrays
 const districtsDataRaw = rawDistricts[2].data;
@@ -18,6 +18,8 @@ const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.nam
 const allUpazilasData = rawUpazilas[2].data;
 
 export default function Register() {
+
+  const router = useRouter();
   const [selectedDistrictId, setSelectedDistrictId] = useState("");
   const [selectedUpazilaId, setSelectedUpazilaId] = useState("");
   
@@ -25,6 +27,8 @@ export default function Register() {
   const [avatarUrl, setAvatarUrl] = useState(""); 
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); 
+  
+  const [showPassword, setShowPassword] = useState(false);
 
   const availableUpazilas = selectedDistrictId 
     ? allUpazilasData.filter(upz => upz.district_id === selectedDistrictId)
@@ -35,7 +39,7 @@ export default function Register() {
     setSelectedUpazilaId(""); 
   };
 
-  // ── Image Upload Handler (Runs immediately on file selection) ──
+  // ── Image Upload Handler ──
   const handleImageChange = async (e) => {
     const imageFile = e.target.files[0];
     if (!imageFile) return;
@@ -55,7 +59,7 @@ export default function Register() {
       const result = await response.json();
       
       if (result.success) {
-        setAvatarUrl(result.data.url); // Save the hosted URL to state
+        setAvatarUrl(result.data.url);
       } else {
         alert("Image upload failed. Please try again.");
       }
@@ -63,10 +67,9 @@ export default function Register() {
       console.error("ImgBB Upload Error:", error);
       alert("Network error during image upload.");
     } finally {
-      setIsUploadingImage(false); // Stop the loading spinner
+      setIsUploadingImage(false);
     }
   };
-
   
   // ── Final Form Submission Handler ──
   const handelSubmit = async (e) => {
@@ -88,23 +91,19 @@ export default function Register() {
       return;
     }
 
-    // Call better-auth sign up directly using the pre-uploaded avatarUrl
     const { data, error } = await authClient.signUp.email({
       name: FullData.name, 
       email: FullData.email, 
       password: FullData.password, 
-      image: avatarUrl, // Uses the URL generated during file selection
-      Role: "donor",
-      isActive: true,
+      image: avatarUrl, 
       callbackURL: "/",
     });
 
-    if (error) {
-      console.error("Sign up failed:", error);
-      alert(error.message);
+    if (data.token) {
+      alert("Sign up successful! Redirecting to home page...");
+      router.push("/");
     } else {
-      console.log("Sign up successful!", data);
-      // Optional: Redirect to dashboard here
+      alert(`Sign up failed: ${error.message}`);
     }
     
     setIsSubmitting(false);
@@ -155,13 +154,11 @@ export default function Register() {
               />
             </div>
 
-            {/* Avatar Upload with Live Preview & Spinner */}
+            {/* Avatar Upload */}
             <div className="sm:col-span-2">
-              <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Avatar</label>
-              <div className="flex items-center gap-[12px]">
-                
-                {/* Preview Box */}
-                <div className="flex items-center justify-center w-[44px] h-[44px] rounded-[11px] border border-dashed border-[#E4E8ED] bg-[#F5F7F9] text-[#5C6675] shrink-0 overflow-hidden relative">
+              <label className="block text-[12.5px] font-semibold mb-1.5 text-[#10141C]">Avatar</label>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-11 h-11 rounded-[11px] border border-dashed border-[#E4E8ED] bg-[#F5F7F9] text-[#5C6675] shrink-0 overflow-hidden relative">
                   {isUploadingImage ? (
                     <div className="w-[18px] h-[18px] border-[2px] border-[#C1121F] border-t-transparent rounded-full animate-spin"></div>
                   ) : avatarUrl ? (
@@ -171,7 +168,6 @@ export default function Register() {
                   )}
                 </div>
 
-                {/* Upload Button */}
                 <label className={`inline-flex items-center justify-center gap-2 bg-white border border-[#E4E8ED] hover:border-[#10141C] hover:bg-[#F5F7F9] text-[#10141C] font-semibold text-[13px] h-[33px] px-[12px] rounded-[9px] transition-colors ${isUploadingImage ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
                   <FiUpload className="text-[15px]" /> {avatarUrl ? "Change photo" : "Choose photo"}
                   <input 
@@ -241,38 +237,44 @@ export default function Register() {
             {/* Password */}
             <div>
               <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Password</label>
-              
-                <input 
-                  name="password" 
-                  type="password" 
-                  placeholder="At least 6 characters" 
-                  required
-                  minLength={6}
-                  className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                />
-              
+              <input 
+                name="password" 
+                type={showPassword ? "text" : "password"} 
+                placeholder="At least 6 characters" 
+                required
+                minLength={6}
+                className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
+              />
             </div>
             
             {/* Confirm Password */}
             <div>
               <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Confirm password</label>
-              
               <input 
                 name="confirmPassword" 
-                type="password" 
+                type={showPassword ? "text" : "password"} 
                 placeholder="Repeat password" 
                 required
                 className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
               />
-            
             </div>
-            <div className="hidden sm:block">
-                <input type ></input>
+
+            {/* Checkbox wrapper placed in a full-width column layout to align nicely below inputs */}
+            <div className="sm:col-span-2 mt-[-4px] mb-[4px]">
+              <label className="inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={showPassword}
+                  onChange={() => setShowPassword(!showPassword)}
+                  className="w-[14px] h-[14px] cursor-pointer"
+                />
+                <span className="text-[13px] text-[#5C6675] ml-2">Show passwords</span>
+              </label>
             </div>
 
             {/* Submit Button */}
-            <div className="sm:col-span-2 mt-[26px]">
-              <button 
+            <div className="sm:col-span-2 mt-2">
+              <button  
                 type="submit" 
                 disabled={isSubmitting || isUploadingImage}
                 className="flex items-center justify-center w-full font-semibold text-[15.5px] text-white bg-[#C1121F] hover:bg-[#7A0A12] disabled:bg-[#A7B0BF] disabled:cursor-not-allowed h-[50px] px-[18px] rounded-[11px] transition-colors cursor-pointer"
