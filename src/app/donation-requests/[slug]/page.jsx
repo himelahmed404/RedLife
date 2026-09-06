@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiHeart, FiX } from "react-icons/fi";
+import Pageshell from "@/components/Pageshell";
 
 // ── Mock Data (Replace with API fetch based on route ID) ──
 const requestData = {
@@ -29,7 +30,7 @@ export default function RequestDetailsPage() {
   // Mock logged-in user data for the donation modal
   const currentUser = {
     name: "Himel Ahmed",
-    email: "himel@roktosetu.app"
+    email: "himel@redlife.app"
   };
 
   const handleConfirmDonation = () => {
@@ -39,6 +40,7 @@ export default function RequestDetailsPage() {
   };
 
   return (
+    <Pageshell>
     <div className="w-full max-w-295 mx-auto px-5 py-8 min-h-screen">
       
       {/* ── Back Button ── */}
@@ -250,5 +252,6 @@ export default function RequestDetailsPage() {
       </AnimatePresence>
 
     </div>
+    </Pageshell>
   );
 }
