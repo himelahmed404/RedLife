@@ -21,12 +21,13 @@ export default function AppNavbar() {
     const dropdownRef = useRef(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+
     // ── Live Auth State ──
-    const { 
-        data: session, 
-        isPending, 
-        error 
-    } = authClient.useSession(); 
+    const {
+        data: session,
+        isPending,
+        error
+    } = authClient.useSession();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -34,7 +35,7 @@ export default function AppNavbar() {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
-        };  
+        };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
@@ -74,11 +75,10 @@ export default function AppNavbar() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`text-[14.5px] font-medium px-3 py-2 rounded-[9px] transition-colors ${
-                                    isActive
-                                        ? "text-[#C1121F] bg-[#FDF1F2]" 
-                                        : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9]" 
-                                }`}
+                                className={`text-[14.5px] font-medium px-3 py-2 rounded-[9px] transition-colors ${isActive
+                                        ? "text-[#C1121F] bg-[#FDF1F2]"
+                                        : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9]"
+                                    }`}
                             >
                                 {link.label}
                             </Link>
@@ -128,19 +128,19 @@ export default function AppNavbar() {
                                                 {session.user.role || "Donor"}
                                             </p>
                                         </div>
-                                        
+
                                         <div className="h-[1px] bg-[#E4E8ED] my-[4px] mx-[4px]"></div>
-                                        
-                                        <Link 
-                                            href="/dashboard" 
+
+                                        <Link
+                                            href={`/dashboard/${session?.user?.role || "donor"}`}
                                             className="flex items-center gap-[10px] px-[10px] py-[9px] text-[13.5px] text-[#10141C] hover:bg-[#F5F7F9] rounded-[8px] transition-colors cursor-pointer w-full"
                                             onClick={() => setIsDropdownOpen(false)}
                                         >
                                             <FiGrid className="text-[16px] text-[#5C6675]" /> Dashboard
                                         </Link>
-                                        
-                                        <button 
-                                            onClick={handleLogout} 
+
+                                        <button
+                                            onClick={handleLogout}
                                             className="flex items-center gap-[10px] px-[10px] py-[9px] text-[13.5px] text-[#C1121F] hover:bg-[#FDF1F2] rounded-[8px] transition-colors w-full text-left outline-none cursor-pointer"
                                         >
                                             <FiLogOut className="text-[16px]" /> Log out
