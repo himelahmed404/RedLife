@@ -46,7 +46,7 @@ export default function Register() {
 
     setIsUploadingImage(true);
 
-    const imgBBApiKey = "1848a46100134ec086d5ea2b99d3f3fa";
+    const imgBBApiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
     const imgBBFormData = new FormData();
     imgBBFormData.append("image", imageFile);
 
@@ -91,19 +91,28 @@ export default function Register() {
       return;
     }
 
+    // Convert the selected IDs back into readable names for the database
+    const districtObj = districtsData.find(d => d.id === FullData.districtId);
+    const upazilaObj = availableUpazilas.find(u => u.id === FullData.upazilaId);
+    const discrictName = districtObj ? districtObj.name : "";
+    const upazilaName = upazilaObj ? upazilaObj.name : "";
+
     const { data, error } = await authClient.signUp.email({
       name: FullData.name, 
       email: FullData.email, 
       password: FullData.password, 
       image: avatarUrl, 
+      bloodGroup: FullData.bloodGroup, // Added
+      district: discrictName,        // Added
+      upazila: upazilaName,          // Added
       callbackURL: "/",
     });
 
-    if (data.token) {
+    if (error) {
+      alert(`Sign up failed: ${error.message}`);
+    } else if (data?.token || data?.user) {
       alert("Sign up successful! Redirecting to home page...");
       router.push("/");
-    } else {
-      alert(`Sign up failed: ${error.message}`);
     }
     
     setIsSubmitting(false);
@@ -259,7 +268,6 @@ export default function Register() {
               />
             </div>
 
-            {/* Checkbox wrapper placed in a full-width column layout to align nicely below inputs */}
             <div className="sm:col-span-2 mt-[-4px] mb-[4px]">
               <label className="inline-flex items-center cursor-pointer select-none">
                 <input 

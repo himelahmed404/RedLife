@@ -19,6 +19,18 @@ export const auth = betterAuth({
       isActive: {
         type: "boolean",
         defaultValue: true,
+      },
+      bloodGroup: {
+        type: "string",
+        defaultValue: "",
+      },
+      district: {
+        type: "string",
+        defaultValue: "",
+      },
+      upazila: {
+        type: "string",
+        defaultValue: "",
       }
     }
   },
