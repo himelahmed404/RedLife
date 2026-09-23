@@ -29,7 +29,7 @@ export default function Login() {
       alert(error.message); 
     } else {
       console.log("Login successful!", data);
-      Router.push("/dashboard"); 
+      Router.push("/"); 
     }
 
     setIsLoading(false);

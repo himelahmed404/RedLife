@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    number: "",
     bloodGroup: "",
     avatarUrl: "",
     district: "",
@@ -30,7 +30,7 @@ export default function ProfilePage() {
       setFormData({
         name: session.user.name || "",
         email: session.user.email || "",
-        phone: session.user.phone || "Not Found",
+        number: session.user.number || "Not Found",
         bloodGroup: session.user.bloodGroup || "Not Found",
         district: session.user.district || "Not Found",
         upazila: session.user.upazila || "Not Found",
@@ -41,29 +41,50 @@ export default function ProfilePage() {
 
   // Handle Input Changes
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });  
   };
 
   // Handle Save
+  // ── Handle Save Profile API Request ──
   const handleSave = async (e) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      // Call better-auth update method (or your custom API endpoint)
-      const { data, error } = await authClient.updateUser({
-        name: formData.name,
-        image: formData.avatarUrl,
-        // Add other custom fields here if your auth.js schema supports them
+      // Send the custom API request to your backend server
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/profile/update-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          name: formData.name,
+          email: formData.email,
+          image: formData.avatarUrl,
+          number: formData.number,
+          bloodGroup: formData.bloodGroup,
+          district: formData.district,
+          upazila: formData.upazila,
+        }),
       });
 
-      if (error) throw new Error(error.message);
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error("Error updating profile:", result.message);
+        throw new Error(result.message || "Failed to update profile");
+      }
 
       console.log("Profile updated successfully!");
       setIsEditing(false);
+      
+      // Optional: Force better-auth to refetch the session so the UI updates immediately
+      // await authClient.getSession({ fetchOptions: { force: true } });
+
     } catch (err) {
       console.error(err);
-      alert("Failed to update profile: " + err.message);
+      alert(err.message);
     } finally {
       setIsSaving(false);
     }
@@ -134,7 +155,7 @@ export default function ProfilePage() {
 
         {/* Content Area */}
         <div className="px-[32px] pt-[56px] pb-[32px]">
-
+          
           <form onSubmit={handleSave}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
 
@@ -183,14 +204,14 @@ export default function ProfilePage() {
                 </label>
                 {isEditing ? (
                   <input
-                    name="phone"
+                    name="number"
                     type="tel"
-                    value={formData.phone}
+                    value={formData.number}
                     onChange={handleChange}
                     className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
                   />
                 ) : (
-                  <p className="text-[15px] text-[#10141C]">{formData.phone}</p>
+                  <p className="text-[15px] text-[#10141C]">{formData.number}</p>
                 )}
               </div>
 

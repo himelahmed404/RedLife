@@ -102,6 +102,7 @@ export default function Register() {
       email: FullData.email, 
       password: FullData.password, 
       image: avatarUrl, 
+      number: FullData.phone,
       bloodGroup: FullData.bloodGroup, // Added
       district: discrictName,        // Added
       upazila: upazilaName,          // Added
@@ -164,7 +165,7 @@ export default function Register() {
             </div>
 
             {/* Avatar Upload */}
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-1">
               <label className="block text-[12.5px] font-semibold mb-1.5 text-[#10141C]">Avatar</label>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-11 h-11 rounded-[11px] border border-dashed border-[#E4E8ED] bg-[#F5F7F9] text-[#5C6675] shrink-0 overflow-hidden relative">
@@ -191,6 +192,19 @@ export default function Register() {
               <span className="block text-[12px] text-[#5C6675] mt-[5px]">
                 JPG or PNG, uploaded to imgBB.
               </span>
+            </div>
+
+            
+            <div>
+              <label className="block text-[12.5px] font-[600] mb-[6px] text-[#10141C]">Phone number</label>
+              <input 
+                name="phone" 
+                type="tel" 
+                placeholder="+8801XXXXXXXXX" 
+                required
+                pattern="01[3-9][0-9]{8}"
+                className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] placeholder-[#A7B0BF] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
+              />
             </div>
 
             {/* Blood Group */}

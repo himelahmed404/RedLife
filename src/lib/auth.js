@@ -16,6 +16,10 @@ export const auth = betterAuth({
         type: "string",
         defaultValue: "donor",
       },
+      number: {
+        type: "string",
+        defaultValue: "",
+      },
       isActive: {
         type: "boolean",
         defaultValue: true,
