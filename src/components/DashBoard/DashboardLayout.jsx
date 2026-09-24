@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }) {
   const userRole = session?.user?.role || "donor";
 
   const adminLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard", icon: FiGrid },
+    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
     { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
     { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/admin/create-donation-request", icon: FiPlusCircle },
@@ -46,14 +46,14 @@ export default function DashboardLayout({ children }) {
   ];
 
   const volunteerLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard", icon: FiGrid },
+    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/volunteer", icon: FiGrid },
     { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/volunteer/create-donation-request", icon: FiPlusCircle },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/volunteer/profile", icon: FiUser },
   ];
 
   const donorLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard", icon: FiGrid },
+    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/donor", icon: FiGrid },
     { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/donor/my-donation-requests", icon: FiList },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/donor/create-donation-request", icon: FiPlusCircle },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/donor/profile", icon: FiUser },
