@@ -7,6 +7,7 @@ import {
   FiPhone, FiDroplet, FiMapPin, FiCamera
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const { data: session, isPending } = authClient.useSession();
@@ -134,7 +135,7 @@ export default function ProfilePage() {
           <div className="absolute -bottom-[40px] left-[32px]">
             <div className="relative w-[80px] h-[80px] rounded-full border-[4px] border-white bg-[#F5F7F9] flex items-center justify-center overflow-hidden">
               {formData.avatarUrl ? (
-                <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                <Image src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" width={80} height={80} />
               ) : (
                 <FiUser className="text-[32px] text-[#A7B0BF]" />
               )}
