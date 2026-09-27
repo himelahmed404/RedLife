@@ -35,6 +35,10 @@ export const auth = betterAuth({
       upazila: {
         type: "string",
         defaultValue: "",
+      },
+      donorId: {
+        type: "string",
+        defaultValue: "",
       }
     }
   },

@@ -49,6 +49,7 @@ export default function CreateDonationRequest() {
             requesterName: session?.user?.name,
             requesterEmail: session?.user?.email,
             userId: session?.user?.id,
+            donorId: null, // Initially no donor assigned
             status: "pending"
         };
 
@@ -73,7 +74,7 @@ export default function CreateDonationRequest() {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
             alert("Request posted to the board successfully!");
-            router.push("/dashboard/requests");
+            router.push(`/dashboard/${session.user.Role}/my-donation-requests`);
 
             // Optional: Redirect or clear form here
         } catch (error) {

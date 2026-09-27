@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }) {
   };
 
   // ── Role-Based Link Configurations ──
-  const userRole = session?.user?.role || "donor";
+  const userRole = session?.user?.Role || "donor";
 
   const adminLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
