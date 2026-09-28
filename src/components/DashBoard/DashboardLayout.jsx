@@ -1,45 +1,37 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
   FiGrid, FiUsers, FiList, FiPlusCircle, FiUser, 
-  FiMonitor, FiDollarSign, FiLogOut , FiHome
+  FiMonitor, FiDollarSign, FiLogOut, 
+  FiHome
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client"; 
 
-export default function DashboardLayout({ children }) {
+// Receive session as a prop from layout.jsx (prevents duplicate session fetches & loops)
+export default function DashboardLayout({ children, session }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // ── Session State ──
-  const { data: session, isPending } = authClient.useSession();
-
-  // Protect route if not logged in
-  useEffect(() => {
-    if (!isPending && !session?.user) {
-      router.push("/login");
-    }
-  }, [session, isPending, router]);
-
   const handleLogout = async () => {
     await authClient.signOut();
-    router.push("/login");
+    router.replace("/login");
   };
 
-  // Helper to get initials
   const getInitials = (name) => {
     if (!name) return "U";
     return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
   };
 
-  // ── Role-Based Link Configurations ──
-  const userRole = session?.user?.Role || "donor";
+  // Safe normalized role
+  const rawRole = session?.user?.Role || session?.user?.role || "donor";
+  const userRole = String(rawRole).toLowerCase();
 
   const adminLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-donation-request", icon: FiHome }, 
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-blood-donation-request", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/admin/create-donation-request", icon: FiPlusCircle },
     { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
     { label: "Public donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
@@ -48,7 +40,7 @@ export default function DashboardLayout({ children }) {
 
   const volunteerLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/volunteer", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-donation-requests", icon: FiHome },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-blood-donation-request", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/volunteer/create-donation-request", icon: FiPlusCircle },
     { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/volunteer/profile", icon: FiUser },
@@ -66,7 +58,6 @@ export default function DashboardLayout({ children }) {
     { label: "Funding", shortLabel: "Funds", href: "/funding", icon: FiDollarSign },
   ];
 
-  // ── Determine Active Workspace ──
   let workspaceLinks = donorLinks;
   let workspaceTitle = "donor workspace";
 
@@ -76,11 +67,6 @@ export default function DashboardLayout({ children }) {
   } else if (userRole === "volunteer") {
     workspaceLinks = volunteerLinks;
     workspaceTitle = "volunteer workspace";
-  }
-
-  // Prevent flashing content while checking session
-  if (isPending || !session?.user) {
-    return <div className="min-h-screen bg-[#F5F7F9] flex items-center justify-center">Loading workspace...</div>;
   }
 
   return (
@@ -155,23 +141,19 @@ export default function DashboardLayout({ children }) {
         {/* User Profile Footer */}
         <div className="mt-auto p-[8px] lg:p-[12px]">
           <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-[10px] p-[8px] lg:p-[10px] rounded-[12px] bg-[#1B2230]">
-            
-            {/* Avatar */}
-            {session.user.image ? (
+            {session?.user?.image ? (
                 <img src={session.user.image} alt="Avatar" className="w-[30px] lg:w-[36px] h-[30px] lg:h-[36px] rounded-full object-cover shrink-0" />
             ) : (
                 <div className="w-[30px] lg:w-[36px] h-[30px] lg:h-[36px] rounded-full bg-[#10141C] text-white flex items-center justify-center text-[11px] lg:text-[13px] font-bold shrink-0">
-                    {getInitials(session.user.name)}
+                    {getInitials(session?.user?.name)}
                 </div>
             )}
             
-            {/* Info (Hidden on mobile) */}
             <div className="hidden lg:block min-w-0 flex-1">
-              <p className="text-[13.5px] font-[600] text-white truncate">{session.user.name}</p>
-              <p className="font-mono text-[12px] text-[#69748A] truncate">{session.user.email}</p>
+              <p className="text-[13.5px] font-[600] text-white truncate">{session?.user?.name}</p>
+              <p className="font-mono text-[12px] text-[#69748A] truncate">{session?.user?.email}</p>
             </div>
             
-            {/* Logout Button */}
             <button 
               onClick={handleLogout} 
               title="Log out"
@@ -185,7 +167,6 @@ export default function DashboardLayout({ children }) {
 
       {/* ── MAIN CONTENT AREA ── */}
       <div className="flex-1 min-w-0 flex flex-col">
-        
         {/* Topbar */}
         <header className="h-[62px] bg-white border-b border-[#E4E8ED] flex items-center justify-between px-[16px] lg:px-[28px] shrink-0">
           <span className="font-mono text-[12px] text-[#5C6675] truncate">{pathname}</span>
@@ -206,7 +187,6 @@ export default function DashboardLayout({ children }) {
         <main className="p-[16px] lg:p-[28px] flex-1 overflow-y-auto">
           {children}
         </main>
-        
       </div>
     </div>
   );
