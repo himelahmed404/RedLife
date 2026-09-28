@@ -125,7 +125,7 @@ export default function AppNavbar() {
                                                 {session.user.name}
                                             </p>
                                             <p className="font-mono text-[12px] text-[#5C6675] mt-[2px] capitalize">
-                                                {session.user.role || "Donor"}
+                                                {session.user.Role || "Donor"}
                                             </p>
                                         </div>
 

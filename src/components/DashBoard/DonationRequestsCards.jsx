@@ -9,7 +9,7 @@ import EditRequestModal from "@/components/DashBoard/EditRequestModal";
 import DeleteRequestModal from "@/components/DashBoard/DeleteRequestModal";
 import StatusConfirmModal from "@/components/DashBoard/StatusConfirmModal";
 
-export default function DonationRequestsCards() {
+export default function DonationRequestsCards({ personalOnly = false }) {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,15 +29,16 @@ export default function DonationRequestsCards() {
   const rawRole = session?.user?.Role || session?.user?.role || "donor";
   const userRole = String(rawRole).toLowerCase();
   const isAdminOrVolunteer = userRole === "admin" || userRole === "volunteer";
+  const isAdminButPersonal = userRole === "admin" || userRole === "volunteer" && personalOnly;
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   // ── Fetch Requests ──
   const fetchRequests = async () => {
     if (!session?.user?.id) return;
     try {
       setIsLoading(true);
-      const endpoint = isAdminOrVolunteer
+      const endpoint = isAdminOrVolunteer && !isAdminButPersonal
         ? `${serverUrl}/api/all-blood-donation-requests`
         : `${serverUrl}/api/donation-requests/${session.user.id}`;
 
@@ -184,8 +185,8 @@ export default function DonationRequestsCards() {
                 key={tab}
                 onClick={() => setActiveFilter(tab)}
                 className={`flex items-center gap-[6px] h-[32px] px-[12px] rounded-[9px] text-[13px] font-[600] capitalize transition-colors ${isActive
-                    ? "bg-[#FDF1F2] text-[#C1121F]"
-                    : "text-[#5C6675] hover:bg-[#F5F7F9] hover:text-[#10141C]"
+                  ? "bg-[#FDF1F2] text-[#C1121F]"
+                  : "text-[#5C6675] hover:bg-[#F5F7F9] hover:text-[#10141C]"
                   }`}
               >
                 <span>{tab}</span>
@@ -276,8 +277,8 @@ export default function DonationRequestsCards() {
                             }
                             title="Change status"
                             className={`w-[24px] h-[24px] rounded-full flex items-center justify-center transition-colors ${isInlineEditing
-                                ? "bg-[#10141C] text-white"
-                                : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#E4E8ED]/60"
+                              ? "bg-[#10141C] text-white"
+                              : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#E4E8ED]/60"
                               }`}
                           >
                             <FiEdit2 className="text-[12px]" />

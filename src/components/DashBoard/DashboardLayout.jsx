@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
   FiGrid, FiUsers, FiList, FiPlusCircle, FiUser, 
-  FiMonitor, FiDollarSign, FiLogOut 
+  FiMonitor, FiDollarSign, FiLogOut , FiHome
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client"; 
 
@@ -39,22 +39,24 @@ export default function DashboardLayout({ children }) {
 
   const adminLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
-    { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
-    { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-donation-request", icon: FiHome }, 
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/admin/create-donation-request", icon: FiPlusCircle },
+    { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
+    { label: "Public donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/admin/profile", icon: FiUser },
   ];
 
   const volunteerLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/volunteer", icon: FiGrid },
-    { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-donation-requests", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/volunteer/create-donation-request", icon: FiPlusCircle },
+    { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/volunteer/profile", icon: FiUser },
   ];
 
   const donorLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/donor", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/donor/my-donation-requests", icon: FiList },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/donor/my-donation-requests", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/donor/create-donation-request", icon: FiPlusCircle },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/donor/profile", icon: FiUser },
   ];
