@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
 
-export default function EditRequestModal({ isOpen, onClose, request, onSave, isAdmin }) {
+export default function EditRequestModal({ isOpen, onClose, request, onSave }) {
   const [formData, setFormData] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,7 +20,6 @@ export default function EditRequestModal({ isOpen, onClose, request, onSave, isA
         donationDate: request.donationDate || "",
         donationTime: request.donationTime || "",
         message: request.message || "",
-        status: request.status || "pending",
       });
     }
   }, [request]);
@@ -62,7 +61,7 @@ export default function EditRequestModal({ isOpen, onClose, request, onSave, isA
           >
             <div className="flex items-center justify-between px-[20px] py-[16px] border-b border-[#E4E8ED] shrink-0">
               <h3 className="text-[17px] font-[700] text-[#10141C]">Edit Donation Request</h3>
-              <button onClick={onClose} className="text-[#5C6675] hover:text-[#10141C]">
+              <button type="button" onClick={onClose} className="text-[#5C6675] hover:text-[#10141C]">
                 <FiX className="text-[18px]" />
               </button>
             </div>
@@ -80,7 +79,7 @@ export default function EditRequestModal({ isOpen, onClose, request, onSave, isA
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-[12px] font-[600] text-[#10141C] mb-1">Blood Group</label>
                 <select
                   name="bloodGroup"
@@ -93,22 +92,6 @@ export default function EditRequestModal({ isOpen, onClose, request, onSave, isA
                   ))}
                 </select>
               </div>
-
-              {isAdmin && (
-                <div>
-                  <label className="block text-[12px] font-[600] text-[#10141C] mb-1">Status</label>
-                  <select
-                    name="status"
-                    value={formData.status || "pending"}
-                    onChange={handleChange}
-                    className="w-full h-[40px] border border-[#E4E8ED] rounded-[9px] px-[12px] text-[14px] outline-none focus:border-[#C1121F]"
-                  >
-                    {["pending", "inprogress", "done", "canceled"].map((st) => (
-                      <option key={st} value={st}>{st}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
 
               <div>
                 <label className="block text-[12px] font-[600] text-[#10141C] mb-1">Donation Date</label>
