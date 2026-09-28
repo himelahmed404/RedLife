@@ -29,7 +29,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
   const rawRole = session?.user?.Role || session?.user?.role || "donor";
   const userRole = String(rawRole).toLowerCase();
   const isAdminOrVolunteer = userRole === "admin" || userRole === "volunteer";
-  const isAdminButPersonal = userRole === "admin" || userRole === "volunteer" && personalOnly;
+  const isAdminButPersonal = personalOnly;
 
   const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
@@ -57,7 +57,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
     if (!sessionLoading) {
       fetchRequests();
     }
-  }, [session, sessionLoading, userRole]);
+  }, [session, sessionLoading, userRole, personalOnly]);
 
   // ── Counts ──
   const counts = {

@@ -31,7 +31,7 @@ export default function DashboardLayout({ children, session }) {
 
   const adminLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-blood-donation-request", icon: FiHome },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-donation-request", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/admin/create-donation-request", icon: FiPlusCircle },
     { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
     { label: "Public donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
@@ -40,7 +40,7 @@ export default function DashboardLayout({ children, session }) {
 
   const volunteerLinks = [
     { label: "Dashboard", shortLabel: "Home", href: "/dashboard/volunteer", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-blood-donation-request", icon: FiHome },
+    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-donation-request", icon: FiHome },
     { label: "Create donation request", shortLabel: "Create", href: "/dashboard/volunteer/create-donation-request", icon: FiPlusCircle },
     { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
     { label: "Profile", shortLabel: "Profile", href: "/dashboard/volunteer/profile", icon: FiUser },
