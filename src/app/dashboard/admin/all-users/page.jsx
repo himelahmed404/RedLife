@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiMoreVertical, FiSlash, FiCheckCircle, FiShield, FiUserCheck } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function AllUsersPage() {
   const { data: session } = authClient.useSession();
@@ -33,6 +34,7 @@ export default function AllUsersPage() {
       setUsers(data);
     } catch (err) {
       console.error(err);
+      toast.error("Could not load users.");
     } finally {
       setIsLoading(false);
     }
@@ -72,8 +74,9 @@ export default function AllUsersPage() {
         prev.map((u) => (u._id === userId ? { ...u, isActive: nextIsActive } : u))
       );
       setOpenMenuId(null);
+      toast.success(nextIsActive ? "User unblocked." : "User blocked.");
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -93,8 +96,9 @@ export default function AllUsersPage() {
         )
       );
       setOpenMenuId(null);
+      toast.success(`Role changed to ${nextRole}.`);
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

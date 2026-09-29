@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function EditRequestModal({ isOpen, onClose, request, onSave }) {
   const [formData, setFormData] = useState({});
@@ -37,6 +38,7 @@ export default function EditRequestModal({ isOpen, onClose, request, onSave }) {
       onClose();
     } catch (err) {
       console.error(err);
+      toast.error(err.message || "Could not update request.");
     } finally {
       setIsSubmitting(false);
     }

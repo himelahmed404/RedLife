@@ -4,6 +4,7 @@ import React from "react";
 import { Link } from "@heroui/react";
 import { FiPhone, FiMail, FiMapPin } from "react-icons/fi";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 
 export default function ContactHome() {
   return (
@@ -63,7 +64,8 @@ export default function ContactHome() {
           <form 
             onSubmit={(e) => {
               e.preventDefault();
-              alert("Message sent. We call back within 10 minutes.");
+              toast.success("Message sent. We call back within 10 minutes.");
+              e.target.reset();
             }} 
             className="grid grid-cols-1 sm:grid-cols-2 gap-[16px]"
           >

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { FiGrid, FiLogOut } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 // ── Link Configuration Array ──
@@ -44,6 +45,7 @@ export default function AppNavbar() {
     const handleLogout = async () => {
         setIsDropdownOpen(false);
         await authClient.signOut();
+        toast.success("Logged out.");
         router.push("/"); // Redirect to login after signing out
     };
 

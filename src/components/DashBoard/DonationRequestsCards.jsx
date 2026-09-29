@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiEye, FiEdit2, FiTrash2, FiCheck, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 import EditRequestModal from "@/components/DashBoard/EditRequestModal";
 import DeleteRequestModal from "@/components/DashBoard/DeleteRequestModal";
@@ -48,6 +49,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
       setRequests(data);
     } catch (err) {
       console.error("Fetch requests error:", err);
+      toast.error("Could not load donation requests.");
     } finally {
       setIsLoading(false);
     }
@@ -104,11 +106,13 @@ export default function DonationRequestsCards({ personalOnly = false }) {
         )
       );
 
+      toast.success(`Request marked as ${statusConfirmTarget.newStatus}.`);
+
       // Close states
       setActiveInlineEditId(null);
       setStatusConfirmTarget(null);
     } catch (err) {
-      alert("Could not update status: " + err.message);
+      toast.error("Could not update status: " + err.message);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -126,6 +130,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
     setRequests((prev) =>
       prev.map((r) => (r._id === id ? { ...r, ...updatedFields } : r))
     );
+    toast.success("Request updated.");
   };
 
   // ── Full Delete API Handler ──
@@ -136,6 +141,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
     if (!res.ok) throw new Error("Delete failed");
 
     setRequests((prev) => prev.filter((r) => r._id !== id));
+    toast.success("Request deleted.");
   };
 
   const getStatusChip = (status) => {

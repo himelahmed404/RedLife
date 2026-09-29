@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiHeart, FiX, FiAlertCircle } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function RequestDetailsPage() {
   const router = useRouter();
@@ -29,14 +30,11 @@ export default function RequestDetailsPage() {
     }
   }, [session, sessionLoading, requestId, router]);
 
-  // Prevent rendering page content while verifying authentication
-  if (sessionLoading || !session?.user) {
-    return null;
-  }
+  const isLoggedIn = Boolean(session?.user);
 
-  // ── Fetch Single Request ──
+  // ── Fetch Single Request (only once the user is logged in) ──
   useEffect(() => {
-    if (!requestId) return;
+    if (!requestId || !isLoggedIn) return;
 
     const fetchRequestDetails = async () => {
       try {
@@ -61,7 +59,13 @@ export default function RequestDetailsPage() {
     };
 
     fetchRequestDetails();
-  }, [requestId, serverUrl]);
+  }, [requestId, serverUrl, isLoggedIn]);
+
+  // Prevent rendering page content while verifying authentication
+  // (kept after all hooks so React sees the same hook order on every render)
+  if (sessionLoading || !isLoggedIn) {
+    return null;
+  }
 
   // ── Commit Donation Handler ──
   const handleConfirmDonation = async () => {
@@ -71,7 +75,7 @@ export default function RequestDetailsPage() {
     }
 
     if (session.user.bloodGroup !== requestData.bloodGroup) {
-      alert("You cannot commit to a donation request that matches your own blood group.");
+      toast.error(`Your blood group (${session.user.bloodGroup || "unknown"}) does not match this request (${requestData.bloodGroup}).`);
       return;
     }
 
@@ -102,9 +106,9 @@ export default function RequestDetailsPage() {
       }));
 
       setIsModalOpen(false);
-      alert("Thank you! You have committed to this donation. The requester has been notified.");
+      toast.success("Thank you! You have committed to this donation. The requester has been notified.");
     } catch (err) {
-      alert(err.message || "Something went wrong while confirming donation.");
+      toast.error(err.message || "Something went wrong while confirming donation.");
     } finally {
       setIsSubmitting(false);
     }
@@ -374,7 +378,7 @@ export default function RequestDetailsPage() {
                 {/* Modal Body */}
                 <div className="p-5">
                   <p className="text-[13.5px] text-[#5C6675] mb-4">
-                    The request will move to <b className="text-[#10141C]">inprogress</b> and leave the public board so other donors don't overlap.
+                    The request will move to <b className="text-[#10141C]">inprogress</b> and leave the public board so other donors don&apos;t overlap.
                   </p>
 
                   <div className="flex flex-col gap-3.5">

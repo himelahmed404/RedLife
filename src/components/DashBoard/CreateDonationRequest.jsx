@@ -9,10 +9,18 @@ import { authClient } from "@/lib/auth-client";
 import rawDistricts from "@/lib/asset/data/districts.json";
 import rawUpazilas from "@/lib/asset/data/upazilas.json";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const districtsDataRaw = rawDistricts[2].data;
 const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.name));
 const allUpazilasData = rawUpazilas[2].data;
+
+// "My donation requests" route differs per role (donor uses the plural folder)
+const myRequestsPaths = {
+    admin: "/dashboard/admin/my-donation-request",
+    volunteer: "/dashboard/volunteer/my-donation-request",
+    donor: "/dashboard/donor/my-donation-requests",
+};
 
 export default function CreateDonationRequest() {
     const router = useRouter();
@@ -37,7 +45,7 @@ export default function CreateDonationRequest() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isBlocked) {
-            alert("Your account is blocked. Blocked users cannot create donation requests.");
+            toast.error("Your account is blocked. Blocked users cannot create donation requests.");
             return;
         }
         setIsSubmitting(true);
@@ -81,13 +89,14 @@ export default function CreateDonationRequest() {
 
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
-            alert("Request posted to the board successfully!");
-            router.push(`/dashboard/${session.user.Role}/my-donation-requests`);
+            toast.success("Request posted to the board successfully!");
+            const userRole = String(session?.user?.Role || session?.user?.role || "donor").toLowerCase();
+            router.push(myRequestsPaths[userRole] || myRequestsPaths.donor);
 
             // Optional: Redirect or clear form here
         } catch (error) {
             console.error(error);
-            alert(error.message || "Failed to post request.");
+            toast.error(error.message || "Failed to post request.");
         } finally {
             setIsSubmitting(false);
         }

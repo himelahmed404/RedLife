@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 export default function DeleteRequestModal({ isOpen, onClose, request, onDelete }) {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -15,6 +16,7 @@ export default function DeleteRequestModal({ isOpen, onClose, request, onDelete 
       onClose();
     } catch (err) {
       console.error(err);
+      toast.error(err.message || "Could not delete request.");
     } finally {
       setIsDeleting(false);
     }

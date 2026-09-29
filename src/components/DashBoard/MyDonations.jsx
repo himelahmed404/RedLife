@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiEye, FiDroplet, FiCheckCircle, FiClock } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 
 export default function MyDonations() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
@@ -26,6 +27,7 @@ export default function MyDonations() {
         setDonations(data);
       } catch (err) {
         console.error("Fetch donations error:", err);
+        toast.error("Could not load your donations.");
       } finally {
         setIsLoading(false);
       }

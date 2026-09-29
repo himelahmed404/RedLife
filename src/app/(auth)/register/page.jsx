@@ -11,6 +11,7 @@ import rawUpazilas from "@/lib/asset/data/upazilas.json";
 import { authClient } from "@/lib/auth-client"; 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 // Extract the actual arrays
 const districtsDataRaw = rawDistricts[2].data;
@@ -60,12 +61,13 @@ export default function Register() {
       
       if (result.success) {
         setAvatarUrl(result.data.url);
+        toast.success("Avatar uploaded.");
       } else {
-        alert("Image upload failed. Please try again.");
+        toast.error("Image upload failed. Please try again.");
       }
     } catch (error) {
       console.error("ImgBB Upload Error:", error);
-      alert("Network error during image upload.");
+      toast.error("Network error during image upload.");
     } finally {
       setIsUploadingImage(false);
     }
@@ -80,13 +82,13 @@ export default function Register() {
     const FullData = Object.fromEntries(Data.entries());
 
     if(FullData.password !== FullData.confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       setIsSubmitting(false);
       return;
     }
 
     if (!avatarUrl) {
-      alert("Please upload an avatar image.");
+      toast.error("Please upload an avatar image.");
       setIsSubmitting(false);
       return;
     }
@@ -110,9 +112,9 @@ export default function Register() {
     });
 
     if (error) {
-      alert(`Sign up failed: ${error.message}`);
+      toast.error(`Sign up failed: ${error.message}`);
     } else if (data?.token || data?.user) {
-      alert("Sign up successful! Redirecting to home page...");
+      toast.success("Account created! Welcome to RedLife.");
       router.push("/");
     }
     

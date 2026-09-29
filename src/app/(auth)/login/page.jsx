@@ -5,6 +5,7 @@ import { Link } from "@heroui/react";
 import { motion } from "framer-motion";
 import { authClient } from "@/lib/auth-client"; // Adjust path if necessary
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +27,10 @@ export default function Login() {
 
     if (error) {
       console.error("Login failed:", error);
-      alert(error.message); 
+      toast.error(error.message || "Login failed. Please try again.");
     } else {
       console.log("Login successful!", data);
+      toast.success(`Welcome back, ${data?.user?.name || "friend"}!`);
       Router.push("/"); 
     }
 

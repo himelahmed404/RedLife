@@ -7,6 +7,7 @@ import {
   FiPhone, FiDroplet, FiMapPin, FiCamera, FiShield, FiSlash
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 export default function ProfilePage() {
@@ -80,7 +81,7 @@ export default function ProfilePage() {
         throw new Error(result.message || "Failed to update profile");
       }
 
-      console.log("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       setIsEditing(false);
       
       // Optional: Force better-auth to refetch the session so the UI updates immediately
@@ -88,7 +89,7 @@ export default function ProfilePage() {
 
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }
@@ -149,7 +150,7 @@ export default function ProfilePage() {
                   <FiCamera className="text-white text-[20px]" />
                   <input type="file" className="hidden" accept="image/*" onChange={(e) => {
                     // Add your ImgBB upload logic here if they change it
-                    alert("Hook up ImgBB upload here!");
+                    toast("Avatar upload is not available yet.");
                   }} />
                 </label>
               )}

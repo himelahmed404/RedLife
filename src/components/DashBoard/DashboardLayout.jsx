@@ -9,6 +9,7 @@ import {
   FiHome, FiDroplet
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client"; 
+import toast from "react-hot-toast";
 
 // Receive session as a prop from layout.jsx (prevents duplicate session fetches & loops)
 export default function DashboardLayout({ children, session }) {
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children, session }) {
 
   const handleLogout = async () => {
     await authClient.signOut();
+    toast.success("Logged out.");
     router.replace("/login");
   };
 
