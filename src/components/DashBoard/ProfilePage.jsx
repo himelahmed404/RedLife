@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiEdit2, FiSave, FiX, FiMail, FiUser,
-  FiPhone, FiDroplet, FiMapPin, FiCamera
+  FiPhone, FiDroplet, FiMapPin, FiCamera, FiShield, FiSlash
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
@@ -14,6 +14,9 @@ export default function ProfilePage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Account status (admin can block a user from the All users page)
+  const isBlocked = session?.user?.isActive === false;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -156,7 +159,17 @@ export default function ProfilePage() {
 
         {/* Content Area */}
         <div className="px-[32px] pt-[56px] pb-[32px]">
-          
+
+          {/* Blocked account notice */}
+          {isBlocked && (
+            <div className="flex items-start gap-[10px] mb-[24px] p-[14px_16px] rounded-[12px] border border-[#F5C2C7] bg-[#FDF1F2] text-[#7A0A12]">
+              <FiSlash className="text-[16px] mt-[2px] shrink-0 text-[#C1121F]" />
+              <p className="text-[13.5px] leading-[1.5]">
+                <b>Your account is blocked.</b> You cannot create donation requests until an admin reactivates your account.
+              </p>
+            </div>
+          )}
+
           <form onSubmit={handleSave}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
 
@@ -271,6 +284,29 @@ export default function ProfilePage() {
                   />
                 ) : (
                   <p className="text-[15px] text-[#10141C]">{formData.upazila}</p>
+                )}
+              </div>
+
+              {/* Account Status (read-only, managed by admin) */}
+              <div>
+                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                  <FiShield className="text-[14px]" /> Account Status
+                </label>
+                {isBlocked ? (
+                  <span className="inline-flex items-center gap-[6px] h-[26px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#C1121F] bg-[#FDF1F2]">
+                    <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
+                    blocked
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-[6px] h-[26px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#15803D] bg-[#EDF7F0]">
+                    <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
+                    active
+                  </span>
+                )}
+                {isEditing && (
+                  <span className="block text-[12px] text-[#5C6675] mt-[6px]">
+                    Only an admin can change your account status.
+                  </span>
                 )}
               </div>
 
