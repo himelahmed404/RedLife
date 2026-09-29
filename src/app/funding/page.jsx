@@ -8,6 +8,7 @@ import { FiCreditCard, FiAlertCircle, FiChevronLeft, FiChevronRight } from "reac
 import Pageshell from "@/components/Pageshell";
 import GiveFundModal from "@/components/GiveFundModal";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -34,7 +35,6 @@ export default function Funding() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   useEffect(() => {
     // Handle the redirect back from Stripe Checkout
@@ -48,15 +48,10 @@ export default function Funding() {
 
     const confirmPayment = async () => {
       try {
-        const res = await fetch(`${serverUrl}/api/funds/confirm`, {
+        const data = await apiFetch("/api/funds/confirm", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sessionId }),
+          body: { sessionId },
         });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || "Could not confirm payment.");
-        }
         toast.success(`Thank you! ${formatTaka(data.amount)} added to the fund.`, { id: "fund-confirm" });
       } catch (err) {
         toast.error(err.message, { id: "fund-confirm" });
@@ -72,11 +67,7 @@ export default function Funding() {
       }
 
       try {
-        const res = await fetch(`${serverUrl}/api/funds`);
-        if (!res.ok) {
-          throw new Error("Failed to load contributions.");
-        }
-        const data = await res.json();
+        const data = await apiFetch("/api/funds");
         setFunds(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Funding fetch error:", err);
@@ -87,7 +78,7 @@ export default function Funding() {
     };
 
     loadFunding();
-  }, [serverUrl]);
+  }, []);
 
   const handleGiveFund = () => {
     if (!session?.user) {

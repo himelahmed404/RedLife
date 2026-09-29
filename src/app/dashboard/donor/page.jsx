@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiArrowRight, FiEye, FiEdit2, FiTrash2, FiDroplet } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 
 import EditRequestModal from "@/components/DashBoard/EditRequestModal";
 import DeleteRequestModal from "@/components/DashBoard/DeleteRequestModal";
@@ -24,9 +25,7 @@ export default function DonorDashboardHome() {
     if (!session?.user?.id) return;
     try {
       setIsLoading(true);
-      const res = await fetch(`http://localhost:5000/api/donation-requests/${session.user.id}`);
-      if (!res.ok) throw new Error("Failed to fetch requests");
-      const data = await res.json();
+      const data = await apiFetch(`/api/donation-requests/${session.user.id}`);
       // Take only the top 3 latest items
       setRecentRequests(data.slice(0, 3));
     } catch (err) {
@@ -44,12 +43,10 @@ export default function DonorDashboardHome() {
 
   // Handle Edit submission
   const handleSaveEdit = async (id, updatedFields) => {
-    const res = await fetch(`http://localhost:5000/api/donation-requests/edit/${id}`, {
+    await apiFetch(`/api/donation-requests/edit/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFields),
+      body: updatedFields,
     });
-    if (!res.ok) throw new Error("Update failed");
 
     setRecentRequests((prev) =>
       prev.map((r) => (r._id === id ? { ...r, ...updatedFields } : r))
@@ -58,10 +55,7 @@ export default function DonorDashboardHome() {
 
   // Handle Delete
   const handleDelete = async (id) => {
-    const res = await fetch(`http://localhost:5000/api/donation-requests/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) throw new Error("Delete failed");
+    await apiFetch(`/api/donation-requests/${id}`, { method: "DELETE" });
 
     setRecentRequests((prev) => prev.filter((r) => r._id !== id));
   };

@@ -7,6 +7,7 @@ import {
   FiPhone, FiDroplet, FiMapPin, FiCamera, FiShield, FiSlash
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -57,29 +58,18 @@ export default function ProfilePage() {
 
     try {
       // Send the custom API request to your backend server
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/profile/update-profile`, {
+      await apiFetch("/api/profile/update-profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+        body: {
           userId: session.user.id,
           name: formData.name,
-          email: formData.email,
           image: formData.avatarUrl,
           number: formData.number,
           bloodGroup: formData.bloodGroup,
           district: formData.district,
           upazila: formData.upazila,
-        }),
+        },
       });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error("Error updating profile:", result.message);
-        throw new Error(result.message || "Failed to update profile");
-      }
 
       toast.success("Profile updated successfully!");
       setIsEditing(false);

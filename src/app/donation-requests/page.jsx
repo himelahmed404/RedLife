@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { FiMapPin, FiCalendar, FiClock, FiEye, FiAlertCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaRegHospital } from "react-icons/fa";
 import Pageshell from "@/components/Pageshell";
+import { apiFetch } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -28,7 +29,6 @@ export default function DonationRequests() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   useEffect(() => {
     const fetchOpenRequests = async () => {
@@ -36,12 +36,7 @@ export default function DonationRequests() {
         setIsLoading(true);
         setError(null);
 
-        const res = await fetch(`${serverUrl}/api/all-blood-donation-requests`);
-        if (!res.ok) {
-          throw new Error("Failed to load donation requests.");
-        }
-
-        const data = await res.json();
+        const data = await apiFetch("/api/all-blood-donation-requests");
         // Public board only shows open/pending requests
         const pendingOnly = (Array.isArray(data) ? data : []).filter(
           (req) => req.status === "pending"
@@ -56,7 +51,7 @@ export default function DonationRequests() {
     };
 
     fetchOpenRequests();
-  }, [serverUrl]);
+  }, []);
 
   // ── Pagination Math ──
   const totalPages = Math.ceil(requests.length / ITEMS_PER_PAGE) || 1;

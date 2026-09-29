@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FiMoreVertical, FiSlash, FiCheckCircle, FiShield, FiUserCheck } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function AllUsersPage() {
@@ -28,9 +29,7 @@ export default function AllUsersPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/admin/users`);
-      if (!res.ok) throw new Error("Failed to fetch users");
-      const data = await res.json();
+      const data = await apiFetch("/api/admin/users");
       setUsers(data);
     } catch (err) {
       console.error(err);
@@ -63,12 +62,10 @@ export default function AllUsersPage() {
   const handleToggleStatus = async (userId, currentIsActive) => {
     const nextIsActive = !currentIsActive;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/status`, {
+      await apiFetch(`/api/admin/users/${userId}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: nextIsActive }),
+        body: { isActive: nextIsActive },
       });
-      if (!res.ok) throw new Error("Status update failed");
 
       setUsers((prev) =>
         prev.map((u) => (u._id === userId ? { ...u, isActive: nextIsActive } : u))
@@ -83,12 +80,10 @@ export default function AllUsersPage() {
   // Action: Update Role
   const handleChangeRole = async (userId, nextRole) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+      await apiFetch(`/api/admin/users/${userId}/role`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: nextRole }),
+        body: { role: nextRole },
       });
-      if (!res.ok) throw new Error("Role change failed");
 
       setUsers((prev) =>
         prev.map((u) =>

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { FiSearch, FiMapPin, FiMail, FiPhone, FiAlertCircle, FiUserX } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
+import { apiFetch } from "@/lib/api";
 
 // ── Imports for Location Data ──
 import rawDistricts from "@/lib/asset/data/districts.json";
@@ -41,7 +42,6 @@ export default function SearchDonors() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   const availableUpazilas = selectedDistrictId
     ? allUpazilasData
@@ -70,12 +70,7 @@ export default function SearchDonors() {
       setIsLoading(true);
       setError(null);
 
-      const res = await fetch(`${serverUrl}/api/donors/search?${params.toString()}`);
-      if (!res.ok) {
-        throw new Error("Failed to search donors.");
-      }
-
-      const data = await res.json();
+      const data = await apiFetch(`/api/donors/search?${params.toString()}`);
       setDonors(Array.isArray(data) ? data : []);
       setHasSearched(true);
     } catch (err) {

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiX, FiCreditCard } from "react-icons/fi";
+import { apiFetch } from "@/lib/api";
 
 const PRESET_AMOUNTS = [300, 500, 1000, 2500];
 const MIN_AMOUNT = 100;
@@ -13,7 +14,6 @@ export default function GiveFundModal({ isOpen, onClose, userId }) {
     const [amount, setAmount] = useState("500");
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
     if (!isOpen) return null;
 
@@ -28,14 +28,12 @@ export default function GiveFundModal({ isOpen, onClose, userId }) {
 
         try {
             setIsProcessing(true);
-            const res = await fetch(`${serverUrl}/api/funds/create-checkout-session`, {
+            const data = await apiFetch("/api/funds/create-checkout-session", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ userId, amount: value }),
+                body: { userId, amount: value },
             });
-            const data = await res.json();
-            if (!res.ok || !data.url) {
-                throw new Error(data.message || "Could not start payment.");
+            if (!data?.url) {
+                throw new Error("Could not start payment.");
             }
             // Hand off to Stripe's hosted payment page
             window.location.href = data.url;

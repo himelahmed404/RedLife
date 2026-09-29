@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FiCheckCircle, FiSlash } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 
 // ── Imports for Location Data ──
 import rawDistricts from "@/lib/asset/data/districts.json";
@@ -69,26 +70,11 @@ export default function CreateDonationRequest() {
         };
 
         try {
-            // Replace this with your actual API endpoint to save the request
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-donation-request`, {
+            await apiFetch("/api/create-donation-request", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
+                body: payload,
             });
 
-            if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({}));
-                throw new Error(errorBody.message || "Failed to post request.");
-            }
-
-            const result = await response.json();
-            console.log("Donation request created:", result);
-            console.log("Submitting request payload:", payload);
-
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
             toast.success("Request posted to the board successfully!");
             const userRole = String(session?.user?.Role || session?.user?.role || "donor").toLowerCase();
             router.push(myRequestsPaths[userRole] || myRequestsPaths.donor);

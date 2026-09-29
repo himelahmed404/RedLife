@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiEye, FiEdit2, FiTrash2, FiCheck, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 
 import EditRequestModal from "@/components/DashBoard/EditRequestModal";
@@ -32,7 +33,6 @@ export default function DonationRequestsCards({ personalOnly = false }) {
   const isAdminOrVolunteer = userRole === "admin" || userRole === "volunteer";
   const isAdminButPersonal = personalOnly;
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   // ── Fetch Requests ──
   const fetchRequests = async () => {
@@ -40,12 +40,10 @@ export default function DonationRequestsCards({ personalOnly = false }) {
     try {
       setIsLoading(true);
       const endpoint = isAdminOrVolunteer && !isAdminButPersonal
-        ? `${serverUrl}/api/all-blood-donation-requests`
-        : `${serverUrl}/api/donation-requests/${session.user.id}`;
+        ? "/api/all-blood-donation-requests"
+        : `/api/donation-requests/${session.user.id}`;
 
-      const res = await fetch(endpoint);
-      if (!res.ok) throw new Error("Failed to fetch requests");
-      const data = await res.json();
+      const data = await apiFetch(endpoint);
       setRequests(data);
     } catch (err) {
       console.error("Fetch requests error:", err);
@@ -90,13 +88,10 @@ export default function DonationRequestsCards({ personalOnly = false }) {
 
     try {
       setIsUpdatingStatus(true);
-      const res = await fetch(`${serverUrl}/api/donation-requests/status/${statusConfirmTarget._id}`, {
+      await apiFetch(`/api/donation-requests/status/${statusConfirmTarget._id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: statusConfirmTarget.newStatus }),
+        body: { status: statusConfirmTarget.newStatus },
       });
-
-      if (!res.ok) throw new Error("Status update failed");
 
       setRequests((prev) =>
         prev.map((r) =>
@@ -120,12 +115,10 @@ export default function DonationRequestsCards({ personalOnly = false }) {
 
   // ── Full Edit API Handler ──
   const handleSaveEdit = async (id, updatedFields) => {
-    const res = await fetch(`${serverUrl}/api/donation-requests/edit/${id}`, {
+    await apiFetch(`/api/donation-requests/edit/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFields),
+      body: updatedFields,
     });
-    if (!res.ok) throw new Error("Update failed");
 
     setRequests((prev) =>
       prev.map((r) => (r._id === id ? { ...r, ...updatedFields } : r))
@@ -135,10 +128,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
 
   // ── Full Delete API Handler ──
   const handleDelete = async (id) => {
-    const res = await fetch(`${serverUrl}/api/donation-requests/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) throw new Error("Delete failed");
+    await apiFetch(`/api/donation-requests/${id}`, { method: "DELETE" });
 
     setRequests((prev) => prev.filter((r) => r._id !== id));
     toast.success("Request deleted.");

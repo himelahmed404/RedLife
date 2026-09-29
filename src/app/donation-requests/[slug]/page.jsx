@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiHeart, FiX, FiAlertCircle } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function RequestDetailsPage() {
@@ -14,7 +15,6 @@ export default function RequestDetailsPage() {
   const requestId = params?.slug;
 
   const { data: session, isPending: sessionLoading } = authClient.useSession();
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   const [requestData, setRequestData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,15 +40,7 @@ export default function RequestDetailsPage() {
       try {
         setIsLoading(true);
         setError(null);
-        console.log("Fetching donation request details for ID:", requestId);
-
-        // Fetch from Express API
-        const res = await fetch(`${serverUrl}/api/donation-requests/detail/${requestId}`);
-        if (!res.ok) {
-          throw new Error("Unable to locate this donation request.");
-        }
-
-        const data = await res.json();
+        const data = await apiFetch(`/api/donation-requests/detail/${requestId}`);
         setRequestData(data);
       } catch (err) {
         console.error("Details fetch error:", err);
@@ -59,7 +51,7 @@ export default function RequestDetailsPage() {
     };
 
     fetchRequestDetails();
-  }, [requestId, serverUrl, isLoggedIn]);
+  }, [requestId, isLoggedIn]);
 
   // Prevent rendering page content while verifying authentication
   // (kept after all hooks so React sees the same hook order on every render)
@@ -89,15 +81,10 @@ export default function RequestDetailsPage() {
         donorId: session.user.id,
       };
 
-      const res = await fetch(`${serverUrl}/api/donation-requests/status/${requestId}`, {
+      await apiFetch(`/api/donation-requests/status/${requestId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: payload,
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to commit to this donation.");
-      }
 
       // Update state locally
       setRequestData((prev) => ({

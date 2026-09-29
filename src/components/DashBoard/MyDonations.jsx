@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiEye, FiDroplet, FiCheckCircle, FiClock } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { apiFetch } from "@/lib/api";
 import toast from "react-hot-toast";
 
 export default function MyDonations() {
@@ -12,7 +13,6 @@ export default function MyDonations() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
 
-  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
   // ── Fetch donations where this user is the donor ──
   useEffect(() => {
@@ -21,9 +21,7 @@ export default function MyDonations() {
     const fetchDonations = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(`${serverUrl}/api/my-donations/${session.user.id}`);
-        if (!res.ok) throw new Error("Failed to fetch donations");
-        const data = await res.json();
+        const data = await apiFetch(`/api/my-donations/${session.user.id}`);
         setDonations(data);
       } catch (err) {
         console.error("Fetch donations error:", err);
@@ -34,7 +32,7 @@ export default function MyDonations() {
     };
 
     fetchDonations();
-  }, [session, sessionLoading, serverUrl]);
+  }, [session, sessionLoading]);
 
   // ── Counts ──
   const counts = {
