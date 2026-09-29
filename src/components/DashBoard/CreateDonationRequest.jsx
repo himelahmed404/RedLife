@@ -74,7 +74,7 @@ export default function CreateDonationRequest() {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
             alert("Request posted to the board successfully!");
-            router.push(`/dashboard/${session.user.Role}/my-donation-requests`);
+            router.push(`/dashboard/${session.user.Role}/my-donation-request`);
 
             // Optional: Redirect or clear form here
         } catch (error) {
