@@ -22,6 +22,18 @@ export default function RequestDetailsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // ── Auth Guard: Redirect unauthenticated users to login ──
+  useEffect(() => {
+    if (!sessionLoading && !session?.user) {
+      router.replace(`/login?callbackUrl=/donation-requests/${requestId}`);
+    }
+  }, [session, sessionLoading, requestId, router]);
+
+  // Prevent rendering page content while verifying authentication
+  if (sessionLoading || !session?.user) {
+    return null;
+  }
+
   // ── Fetch Single Request ──
   useEffect(() => {
     if (!requestId) return;
@@ -50,6 +62,54 @@ export default function RequestDetailsPage() {
 
     fetchRequestDetails();
   }, [requestId, serverUrl]);
+
+  // ── Commit Donation Handler ──
+  const handleConfirmDonation = async () => {
+    if (!session?.user) {
+      router.push(`/login?callbackUrl=/donation-requests/${requestId}`);
+      return;
+    }
+
+    if (session.user.bloodGroup !== requestData.bloodGroup) {
+      alert("You cannot commit to a donation request that matches your own blood group.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        status: "inprogress",
+        donorName: session.user.name,
+        donorEmail: session.user.email,
+        donorId: session.user.id,
+      };
+
+      const res = await fetch(`${serverUrl}/api/donation-requests/status/${requestId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to commit to this donation.");
+      }
+
+      // Update state locally
+      setRequestData((prev) => ({
+        ...prev,
+        ...payload,
+      }));
+
+      setIsModalOpen(false);
+      alert("Thank you! You have committed to this donation. The requester has been notified.");
+    } catch (err) {
+      alert(err.message || "Something went wrong while confirming donation.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   const getStatusChip = (status) => {
     switch (status) {
@@ -225,18 +285,26 @@ export default function RequestDetailsPage() {
                 <h3 className="text-[18px] font-bold text-[#10141C] leading-[1.1] tracking-[-0.02em]">
                   Can you go?
                 </h3>
-                
+
                 {isPending && !isOwnRequest && (
                   <>
-                    <p className="text-[13.5px] text-[#5C6675] mt-3">
-                      Committing shares your name and email with the requester so they can contact you directly.
-                    </p>
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="mt-4 flex items-center justify-center w-full bg-[#C1121F] hover:bg-[#7A0A12] text-white font-semibold text-[15px] h-12 rounded-[11px] transition-colors gap-2 cursor-pointer"
-                    >
-                      <FiHeart className="text-[18px]" /> Donate blood
-                    </button>
+                    {session?.user && session?.user?.bloodGroup && session.user.bloodGroup !== requestData.bloodGroup ? (
+                      <div className="mt-3 p-3 rounded-[9px] bg-[#FDF1F2] border border-[#FAD2D4] text-[13px] text-[#C1121F]">
+                        Your profile blood group ({session.user.bloodGroup}) does not match the requested group ({requestData.bloodGroup}).
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-[13.5px] text-[#5C6675] mt-3">
+                          Committing shares your name and email with the requester so they can contact you directly.
+                        </p>
+                        <button
+                          onClick={() => setIsModalOpen(true)}
+                          className="mt-4 flex items-center justify-center w-full bg-[#C1121F] hover:bg-[#7A0A12] text-white font-semibold text-[15px] h-12 rounded-[11px] transition-colors gap-2 cursor-pointer"
+                        >
+                          <FiHeart className="text-[18px]" /> Donate blood
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
 
