@@ -46,18 +46,18 @@ export default function AllUsersPage() {
   const counts = {
     all: users.length,
     active: users.filter((u) => u.isActive !== false).length,
-    inactive: users.filter((u) => u.isActive === false).length,
+    blocked: users.filter((u) => u.isActive === false).length,
   };
 
   const filteredUsers = users.filter((user) => {
     const isUserActive = user.isActive !== false;
     if (activeFilter === "all") return true;
     if (activeFilter === "active") return isUserActive;
-    if (activeFilter === "inactive") return !isUserActive;
+    if (activeFilter === "blocked") return !isUserActive;
     return true;
   });
 
-  // Action: Toggle Active / Inactive
+  // Action: Toggle Active / Blocked
   const handleToggleStatus = async (userId, currentIsActive) => {
     const nextIsActive = !currentIsActive;
     try {
@@ -122,12 +122,12 @@ export default function AllUsersPage() {
 
       {/* Card Table */}
       <div className="bg-white border border-[#E4E8ED] rounded-[14px] overflow-visible">
-        {/* Tabs: All / Active / Inactive */}
+        {/* Tabs: All / Active / Blocked */}
         <div className="flex items-center gap-[6px] p-[12px_16px] border-b border-[#E4E8ED]">
           {[
             { key: "all", label: "All" },
             { key: "active", label: "active" },
-            { key: "inactive", label: "inactive" },
+            { key: "blocked", label: "blocked" },
           ].map((tab) => {
             const isActive = activeFilter === tab.key;
             return (
@@ -230,7 +230,7 @@ export default function AllUsersPage() {
                         </span>
                       </td>
 
-                      {/* Status Pill: ACTIVE vs INACTIVE */}
+                      {/* Status Pill: ACTIVE vs BLOCKED */}
                       <td className="py-[14px] px-[16px] align-middle">
                         {isUserActive ? (
                           <span className="inline-flex items-center gap-[6px] h-[24px] px-[9px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#15803D] bg-[#EDF7F0]">
@@ -238,9 +238,9 @@ export default function AllUsersPage() {
                             ACTIVE
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-[6px] h-[24px] px-[9px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#64748B] bg-[#F1F5F9]">
+                          <span className="inline-flex items-center gap-[6px] h-[24px] px-[9px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#C1121F] bg-[#FDF1F2]">
                             <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
-                            INACTIVE
+                            BLOCKED
                           </span>
                         )}
                       </td>
@@ -259,7 +259,7 @@ export default function AllUsersPage() {
                             ref={menuRef}
                             className="absolute right-[16px] top-[48px] w-[180px] bg-white border border-[#E4E8ED] rounded-[12px] shadow-[0_12px_32px_rgba(16,20,28,0.13)] py-[6px] px-[6px] z-50 text-left"
                           >
-                            {/* Make Inactive / Active button */}
+                            {/* Block / Unblock button */}
                             <button
                               onClick={() => handleToggleStatus(user._id, isUserActive)}
                               className={`w-full flex items-center gap-[9px] px-[10px] py-[8px] rounded-[8px] text-[13px] font-[500] hover:bg-[#F5F7F9] transition-colors ${
@@ -268,11 +268,11 @@ export default function AllUsersPage() {
                             >
                               {!isUserActive ? (
                                 <>
-                                  <FiCheckCircle className="text-[15px]" /> Activate user
+                                  <FiCheckCircle className="text-[15px]" /> Unblock user
                                 </>
                               ) : (
                                 <>
-                                  <FiSlash className="text-[15px]" /> Make inactive
+                                  <FiSlash className="text-[15px]" /> Block user
                                 </>
                               )}
                             </button>

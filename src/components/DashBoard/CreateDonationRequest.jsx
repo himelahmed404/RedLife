@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiSlash } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 
 // ── Imports for Location Data ──
@@ -22,6 +22,9 @@ export default function CreateDonationRequest() {
     const [selectedUpazilaId, setSelectedUpazilaId] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Only active users can create donation requests
+    const isBlocked = session?.user?.isActive === false;
+
     const availableUpazilas = selectedDistrictId
         ? allUpazilasData.filter(upz => upz.district_id === selectedDistrictId)
         : [];
@@ -33,6 +36,10 @@ export default function CreateDonationRequest() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isBlocked) {
+            alert("Your account is blocked. Blocked users cannot create donation requests.");
+            return;
+        }
         setIsSubmitting(true);
 
         const formData = new FormData(e.target);
@@ -64,7 +71,8 @@ export default function CreateDonationRequest() {
             });
 
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                const errorBody = await response.json().catch(() => ({}));
+                throw new Error(errorBody.message || "Failed to post request.");
             }
 
             const result = await response.json();
@@ -74,12 +82,12 @@ export default function CreateDonationRequest() {
             // Simulate API delay
             await new Promise(resolve => setTimeout(resolve, 1000));
             alert("Request posted to the board successfully!");
-            router.push(`/dashboard/${session.user.Role}/my-donation-request`);
+            router.push(`/dashboard/${session.user.Role}/my-donation-requests`);
 
             // Optional: Redirect or clear form here
         } catch (error) {
             console.error(error);
-            alert("Failed to post request.");
+            alert(error.message || "Failed to post request.");
         } finally {
             setIsSubmitting(false);
         }
@@ -98,6 +106,29 @@ export default function CreateDonationRequest() {
                 </h2>
             </div>
 
+            {isBlocked ? (
+                <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="bg-white border border-[#E4E8ED] rounded-[16px] p-[24px] md:p-[32px] flex flex-col items-center text-center"
+                >
+                    <span className="w-[48px] h-[48px] rounded-full bg-[#FDF1F2] text-[#C1121F] flex items-center justify-center mb-[14px]">
+                        <FiSlash className="text-[22px]" />
+                    </span>
+                    <span className="inline-flex items-center gap-[6px] h-[25px] px-[10px] rounded-full font-mono text-[11px] font-[600] tracking-[0.05em] uppercase text-[#C1121F] bg-[#FDF1F2] mb-[12px]">
+                        <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
+                        blocked
+                    </span>
+                    <h3 className="text-[18px] font-bold text-[#10141C] mb-[6px]">
+                        Your account is blocked.
+                    </h3>
+                    <p className="text-[14px] text-[#5C6675] max-w-[420px]">
+                        Blocked users cannot create donation requests. Please contact an admin to get your account reactivated.
+                    </p>
+                </motion.div>
+            ) : (
+            <>
             {/* Form Card */}
             <motion.div
                 initial={{ opacity: 0, y: 15 }}
@@ -298,6 +329,8 @@ export default function CreateDonationRequest() {
 
                 </form>
             </motion.div>
+            </>
+            )}
         </div>
     );
 }
