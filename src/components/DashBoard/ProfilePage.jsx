@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiEdit2, FiSave, FiX, FiMail, FiUser,
@@ -8,60 +8,95 @@ import {
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
+import { uploadImage } from "@/lib/uploadImage";
+import { districts, districtByName, upazilasOf } from "@/lib/locations";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
-export default function ProfilePage() {
-  const { data: session, isPending } = authClient.useSession();
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+// Same look for editable and locked fields; `disabled:` styles handle the locked state
+const fieldClass =
+  "w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] bg-white outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10 disabled:bg-[#F5F7F9] disabled:text-[#5C6675] disabled:cursor-not-allowed";
+
+const labelClass = "flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]";
+
+const formFromUser = (user) => ({
+  name: user?.name || "",
+  email: user?.email || "",
+  number: user?.number || "",
+  bloodGroup: user?.bloodGroup || "",
+  district: user?.district || "",
+  upazila: user?.upazila || "",
+  avatarUrl: user?.image || "",
+});
+
+export default function ProfilePage() {
+  const { data: session, isPending, refetch } = authClient.useSession();
+
+  if (isPending || !session?.user) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="w-[30px] h-[30px] border-[3px] border-[#C1121F] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return <ProfileForm user={session.user} refetch={refetch} />;
+}
+
+function ProfileForm({ user, refetch }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [formData, setFormData] = useState(() => formFromUser(user));
 
   // Account status (admin can block a user from the All users page)
-  const isBlocked = session?.user?.status === "blocked";
+  const isBlocked = user.status === "blocked";
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    number: "",
-    bloodGroup: "",
-    avatarUrl: "",
-    district: "",
-    upazila: ""
-  });
+  const upazilaOptions = upazilasOf(districtByName(formData.district)?.id);
 
-  // Populate state once session loads
-  useEffect(() => {
-    if (session?.user) {
-      setFormData({
-        name: session.user.name || "",
-        email: session.user.email || "",
-        number: session.user.number || "Not Found",
-        bloodGroup: session.user.bloodGroup || "Not Found",
-        district: session.user.district || "Not Found",
-        upazila: session.user.upazila || "Not Found",
-        avatarUrl: session.user.image || "",
-      });
-    }
-  }, [session]);
-
-  // Handle Input Changes
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });  
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      // A new district invalidates the chosen upazila
+      ...(name === "district" && { upazila: "" }),
+    }));
   };
 
-  // Handle Save
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const url = await uploadImage(file);
+      setFormData((prev) => ({ ...prev, avatarUrl: url }));
+      toast.success("Avatar uploaded. Save to keep it.");
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData(formFromUser(user));
+    setIsEditing(false);
+  };
+
   // ── Handle Save Profile API Request ──
   const handleSave = async (e) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      // Send the custom API request to your backend server
       await apiFetch("/api/profile/update-profile", {
         method: "POST",
         body: {
-          userId: session.user.id,
+          userId: user.id,
           name: formData.name,
           image: formData.avatarUrl,
           number: formData.number,
@@ -71,12 +106,10 @@ export default function ProfilePage() {
         },
       });
 
+      // Pull the saved values into the session so the whole app shows them
+      await refetch();
       toast.success("Profile updated successfully!");
       setIsEditing(false);
-      
-      // Optional: Force better-auth to refetch the session so the UI updates immediately
-      // await authClient.getSession({ fetchOptions: { force: true } });
-
     } catch (err) {
       console.error(err);
       toast.error(err.message);
@@ -84,14 +117,6 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
-
-  if (isPending) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-[30px] h-[30px] border-[3px] border-[#C1121F] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-[880px] mx-auto">
@@ -137,11 +162,18 @@ export default function ProfilePage() {
               {/* Camera Overlay when editing */}
               {isEditing && (
                 <label className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer transition-opacity hover:bg-black/50">
-                  <FiCamera className="text-white text-[20px]" />
-                  <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-                    // Add your ImgBB upload logic here if they change it
-                    toast("Avatar upload is not available yet.");
-                  }} />
+                  {isUploading ? (
+                    <span className="w-[20px] h-[20px] border-[2px] border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <FiCamera className="text-white text-[20px]" />
+                  )}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    disabled={isUploading}
+                    onChange={handleAvatarChange}
+                  />
                 </label>
               )}
             </div>
@@ -149,7 +181,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Content Area */}
-        <div className="px-[32px] pt-[56px] pb-[32px]">
+        <div className="px-[20px] md:px-[32px] pt-[56px] pb-[32px]">
 
           {/* Blocked account notice */}
           {isBlocked && (
@@ -161,126 +193,126 @@ export default function ProfilePage() {
             </div>
           )}
 
+          {/* The form is always shown; fields unlock only in edit mode */}
           <form onSubmit={handleSave}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[24px]">
 
               {/* Name */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="name" className={labelClass}>
                   <FiUser className="text-[14px]" /> Full Name
                 </label>
-                {isEditing ? (
-                  <input
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                  />
-                ) : (
-                  <p className="text-[15px] font-[600] text-[#10141C]">{formData.name}</p>
-                )}
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  required
+                  className={fieldClass}
+                />
               </div>
 
-              {/* Email (ALWAYS DISABLED) */}
+              {/* Email (never editable) */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="email" className={labelClass}>
                   <FiMail className="text-[14px]" /> Email Address
                 </label>
-                {isEditing ? (
-                  <input
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    disabled
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] bg-[#F5F7F9] text-[#A7B0BF] outline-none cursor-not-allowed"
-                    title="Email cannot be changed"
-                  />
-                ) : (
-                  <p className="text-[15px] text-[#10141C]">{formData.email}</p>
-                )}
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  title="Email cannot be changed"
+                  className={fieldClass}
+                />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="number" className={labelClass}>
                   <FiPhone className="text-[14px]" /> Phone Number
                 </label>
-                {isEditing ? (
-                  <input
-                    name="number"
-                    type="tel"
-                    value={formData.number}
-                    onChange={handleChange}
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                  />
-                ) : (
-                  <p className="text-[15px] text-[#10141C]">{formData.number}</p>
-                )}
+                <input
+                  id="number"
+                  name="number"
+                  type="tel"
+                  value={formData.number}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  placeholder="Not set"
+                  className={fieldClass}
+                />
               </div>
 
               {/* Blood Group */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="bloodGroup" className={labelClass}>
                   <FiDroplet className="text-[14px]" /> Blood Group
                 </label>
-                {isEditing ? (
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] bg-white outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                  >
-                    {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(bg => (
-                      <option key={bg} value={bg}>{bg}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <span className="inline-flex flex-col items-center justify-center border-[1.5px] border-[#C1121F] rounded-[7px] bg-white text-[#C1121F] font-mono font-[600] relative overflow-hidden h-[28px] px-[10px] text-[13px] pt-[2px] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[3px] before:bg-[#C1121F]">
-                    {formData.bloodGroup}
-                  </span>
-                )}
+                <select
+                  id="bloodGroup"
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  required
+                  className={fieldClass}
+                >
+                  <option value="">Select group</option>
+                  {BLOOD_GROUPS.map((bg) => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
+                </select>
               </div>
 
-              {/* Location */}
+              {/* Location (stored by name) */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="district" className={labelClass}>
                   <FiMapPin className="text-[14px]" /> District
                 </label>
-                {isEditing ? (
-                  <input
-                    name="district"
-                    type="text"
-                    value={formData.district}
-                    onChange={handleChange}
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                  />
-                ) : (
-                  <p className="text-[15px] text-[#10141C]">{formData.district}</p>
-                )}
+                <select
+                  id="district"
+                  name="district"
+                  value={formData.district}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  required
+                  className={fieldClass}
+                >
+                  <option value="">Select district</option>
+                  {districts.map((dist) => (
+                    <option key={dist.id} value={dist.name}>{dist.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label htmlFor="upazila" className={labelClass}>
                   <FiMapPin className="text-[14px]" /> Upazila
                 </label>
-                {isEditing ? (
-                  <input
-                    name="upazila"
-                    type="text"
-                    value={formData.upazila}
-                    onChange={handleChange}
-                    className="w-full h-[44px] border border-[#E4E8ED] rounded-[11px] px-[13px] text-[14.5px] text-[#10141C] outline-none transition-all focus:border-[#C1121F] focus:ring-[3px] focus:ring-[#C1121F]/10"
-                  />
-                ) : (
-                  <p className="text-[15px] text-[#10141C]">{formData.upazila}</p>
-                )}
+                <select
+                  id="upazila"
+                  name="upazila"
+                  value={formData.upazila}
+                  onChange={handleChange}
+                  disabled={!isEditing || !formData.district}
+                  required
+                  className={fieldClass}
+                >
+                  <option value="">
+                    {formData.district ? "Select upazila" : "Pick a district first"}
+                  </option>
+                  {upazilaOptions.map((upz) => (
+                    <option key={upz.id} value={upz.name}>{upz.name}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Account Status (read-only, managed by admin) */}
               <div>
-                <label className="flex items-center gap-[8px] text-[12.5px] font-[600] mb-[8px] text-[#5C6675]">
+                <label className={labelClass}>
                   <FiShield className="text-[14px]" /> Account Status
                 </label>
                 {isBlocked ? (
@@ -301,11 +333,7 @@ export default function ProfilePage() {
                 )}
               </div>
 
-
             </div>
-
-
-
 
             {/* Edit Mode Action Buttons */}
             <AnimatePresence>
@@ -318,7 +346,7 @@ export default function ProfilePage() {
                 >
                   <button
                     type="button"
-                    onClick={() => setIsEditing(false)}
+                    onClick={handleCancel}
                     disabled={isSaving}
                     className="inline-flex items-center justify-center font-semibold text-[14px] text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9] h-[42px] px-[18px] rounded-[11px] transition-colors disabled:opacity-50"
                   >
@@ -327,7 +355,7 @@ export default function ProfilePage() {
 
                   <button
                     type="submit"
-                    disabled={isSaving}
+                    disabled={isSaving || isUploading}
                     className="inline-flex items-center justify-center font-semibold text-[14px] text-white bg-[#C1121F] hover:bg-[#7A0A12] h-[42px] px-[24px] rounded-[11px] transition-colors disabled:bg-[#A7B0BF] disabled:cursor-not-allowed"
                   >
                     {isSaving ? "Saving..." : <><FiSave className="mr-[8px]" /> Save Changes</>}

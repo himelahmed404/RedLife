@@ -4,16 +4,16 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link } from "@heroui/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
-import { FiGrid, FiLogOut } from "react-icons/fi";
+import { FiGrid, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
 // ── Link Configuration Array ──
+// Funding is a private page, so it only shows once the user is logged in
 const NAV_LINKS = [
-    { label: "Home", href: "/" },
-    { label: "Donation requests", href: "/donation-requests" },
-    { label: "Funding", href: "/funding" }
+    { label: "Donation requests", href: "/donation-requests", private: false },
+    { label: "Funding", href: "/funding", private: true },
 ];
 
 export default function AppNavbar() {
@@ -21,14 +21,12 @@ export default function AppNavbar() {
     const router = useRouter();
     const dropdownRef = useRef(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
 
     // ── Live Auth State ──
-    const {
-        data: session,
-        isPending,
-        error
-    } = authClient.useSession();
+    const { data: session, isPending } = authClient.useSession();
+
+    const visibleLinks = NAV_LINKS.filter((link) => !link.private || session?.user);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -44,10 +42,17 @@ export default function AppNavbar() {
     // Actual Logout Logic
     const handleLogout = async () => {
         setIsDropdownOpen(false);
+        setIsMobileOpen(false);
         await authClient.signOut();
         toast.success("Logged out.");
-        router.push("/"); // Redirect to login after signing out
+        router.push("/");
     };
+
+    const linkClass = (href) =>
+        `text-[14.5px] font-medium px-3 py-2 rounded-[9px] transition-colors ${pathname === href
+            ? "text-[#C1121F] bg-[#FDF1F2]"
+            : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9]"
+        }`;
 
     return (
         <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E4E8ED]">
@@ -68,24 +73,13 @@ export default function AppNavbar() {
                     </p>
                 </Link>
 
-                {/* Center Links */}
+                {/* Center Links (tablet and up) */}
                 <div className="hidden sm:flex items-center gap-1">
-                    {NAV_LINKS.map((link) => {
-                        const isActive = pathname === link.href;
-
-                        return (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={`text-[14.5px] font-medium px-3 py-2 rounded-[9px] transition-colors ${isActive
-                                        ? "text-[#C1121F] bg-[#FDF1F2]"
-                                        : "text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9]"
-                                    }`}
-                            >
-                                {link.label}
-                            </Link>
-                        );
-                    })}
+                    {visibleLinks.map((link) => (
+                        <Link key={link.href} href={link.href} className={linkClass(link.href)}>
+                            {link.label}
+                        </Link>
+                    ))}
                 </div>
 
                 {/* Right Action Area (Auth State) */}
@@ -163,14 +157,70 @@ export default function AppNavbar() {
 
                             <Link
                                 href="/register"
-                                className="flex items-center justify-center font-semibold text-[14px] text-white bg-[#C1121F] hover:bg-[#7A0A12] h-[42px] px-[18px] rounded-[11px] transition-colors"
+                                className="hidden sm:flex items-center justify-center font-semibold text-[14px] text-white bg-[#C1121F] hover:bg-[#7A0A12] h-[42px] px-[18px] rounded-[11px] transition-colors"
                             >
                                 Join as a donor
                             </Link>
                         </>
                     )}
+
+                    {/* Mobile menu toggle */}
+                    <button
+                        type="button"
+                        onClick={() => setIsMobileOpen(!isMobileOpen)}
+                        aria-label={isMobileOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={isMobileOpen}
+                        className="sm:hidden w-[42px] h-[42px] rounded-[11px] border border-[#E4E8ED] flex items-center justify-center text-[#10141C] hover:bg-[#F5F7F9] transition-colors"
+                    >
+                        {isMobileOpen ? <FiX className="text-[19px]" /> : <FiMenu className="text-[19px]" />}
+                    </button>
                 </div>
             </nav>
+
+            {/* Mobile Menu Panel */}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="sm:hidden overflow-hidden border-t border-[#E4E8ED] bg-white"
+                    >
+                        <div className="flex flex-col gap-1 px-5 py-3">
+                            {visibleLinks.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => setIsMobileOpen(false)}
+                                    className={linkClass(link.href)}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+
+                            {!isPending && !session?.user && (
+                                <div className="grid grid-cols-2 gap-2 pt-2 mt-1 border-t border-[#E4E8ED]">
+                                    <Link
+                                        href="/login"
+                                        onClick={() => setIsMobileOpen(false)}
+                                        className="flex items-center justify-center font-semibold text-[14px] text-[#10141C] border border-[#E4E8ED] hover:bg-[#F5F7F9] h-[42px] rounded-[11px] transition-colors"
+                                    >
+                                        Log in
+                                    </Link>
+                                    <Link
+                                        href="/register"
+                                        onClick={() => setIsMobileOpen(false)}
+                                        className="flex items-center justify-center font-semibold text-[14px] text-white bg-[#C1121F] hover:bg-[#7A0A12] h-[42px] rounded-[11px] transition-colors"
+                                    >
+                                        Join as a donor
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </header>
     );
 }

@@ -8,11 +8,7 @@ import Pageshell from "@/components/Pageshell";
 import { apiFetch } from "@/lib/api";
 
 // ── Imports for Location Data ──
-import rawDistricts from "@/lib/asset/data/districts.json";
-import rawUpazilas from "@/lib/asset/data/upazilas.json";
-
-const districtsData = [...rawDistricts[2].data].sort((a, b) => a.name.localeCompare(b.name));
-const allUpazilasData = rawUpazilas[2].data;
+import { districts as districtsData, upazilasOf } from "@/lib/locations";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
@@ -43,11 +39,7 @@ export default function SearchDonors() {
   const [error, setError] = useState(null);
 
 
-  const availableUpazilas = selectedDistrictId
-    ? allUpazilasData
-        .filter((upz) => upz.district_id === selectedDistrictId)
-        .sort((a, b) => a.name.localeCompare(b.name))
-    : [];
+  const availableUpazilas = upazilasOf(selectedDistrictId);
 
   const handleDistrictChange = (e) => {
     setSelectedDistrictId(e.target.value);

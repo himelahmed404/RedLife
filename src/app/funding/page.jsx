@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { FiCreditCard, FiAlertCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
+import PrivateRoute from "@/components/PrivateRoute";
 import GiveFundModal from "@/components/GiveFundModal";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
@@ -25,8 +25,16 @@ const getInitials = (name = "") =>
 // YYYY-MM-DD in the viewer's local timezone (createdAt is stored in UTC)
 const formatDate = (iso) => (iso ? new Date(iso).toLocaleDateString("en-CA") : "");
 
+// Private page: logged-out visitors are sent to /login and brought back here
 export default function Funding() {
-  const router = useRouter();
+  return (
+    <PrivateRoute>
+      <FundingContent />
+    </PrivateRoute>
+  );
+}
+
+function FundingContent() {
   const { data: session } = authClient.useSession();
 
   const [funds, setFunds] = useState([]);
@@ -80,14 +88,7 @@ export default function Funding() {
     loadFunding();
   }, []);
 
-  const handleGiveFund = () => {
-    if (!session?.user) {
-      toast.error("Please log in to give fund.");
-      router.push("/login");
-      return;
-    }
-    setIsModalOpen(true);
-  };
+  const handleGiveFund = () => setIsModalOpen(true);
 
   // ── Stats ──
   const totalRaised = funds.reduce((sum, f) => sum + Number(f.amount || 0), 0);

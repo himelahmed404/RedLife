@@ -7,6 +7,14 @@ import { authClient } from "@/lib/auth-client"; // Adjust path if necessary
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+// Where to go after login: the private page that sent us here, or home.
+// Read at submit time (not via useSearchParams) so the page stays prerendered.
+// Only same-site paths are allowed, never "//evil.com" style URLs.
+const getCallbackUrl = () => {
+  const target = new URLSearchParams(window.location.search).get("callbackUrl");
+  return target && target.startsWith("/") && !target.startsWith("//") ? target : "/";
+};
+
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const Router = useRouter();
@@ -29,9 +37,8 @@ export default function Login() {
       console.error("Login failed:", error);
       toast.error(error.message || "Login failed. Please try again.");
     } else {
-      console.log("Login successful!", data);
       toast.success(`Welcome back, ${data?.user?.name || "friend"}!`);
-      Router.push("/"); 
+      Router.replace(getCallbackUrl());
     }
 
     setIsLoading(false);

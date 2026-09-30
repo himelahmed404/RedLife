@@ -7,14 +7,10 @@ import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 
 // ── Imports for Location Data ──
-import rawDistricts from "@/lib/asset/data/districts.json";
-import rawUpazilas from "@/lib/asset/data/upazilas.json";
+import { districts as districtsData, upazilasOf } from "@/lib/locations";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-const districtsDataRaw = rawDistricts[2].data;
-const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.name));
-const allUpazilasData = rawUpazilas[2].data;
 
 export default function CreateDonationRequest() {
     const router = useRouter();
@@ -27,9 +23,7 @@ export default function CreateDonationRequest() {
     // Only active users can create donation requests
     const isBlocked = session?.user?.status === "blocked";
 
-    const availableUpazilas = selectedDistrictId
-        ? allUpazilasData.filter(upz => upz.district_id === selectedDistrictId)
-        : [];
+    const availableUpazilas = upazilasOf(selectedDistrictId);
 
     const handleDistrictChange = (e) => {
         setSelectedDistrictId(e.target.value);

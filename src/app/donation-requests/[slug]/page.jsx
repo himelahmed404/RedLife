@@ -5,17 +5,27 @@ import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiArrowLeft, FiHeart, FiX, FiAlertCircle } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
+import PrivateRoute from "@/components/PrivateRoute";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 import StatusChip from "@/components/DashBoard/StatusChip";
 import toast from "react-hot-toast";
 
+// Private page: logged-out visitors are sent to /login and brought back here
 export default function RequestDetailsPage() {
+  return (
+    <PrivateRoute>
+      <RequestDetails />
+    </PrivateRoute>
+  );
+}
+
+function RequestDetails() {
   const router = useRouter();
   const params = useParams();
   const requestId = params?.slug;
 
-  const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const { data: session } = authClient.useSession();
 
   const [requestData, setRequestData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,18 +34,9 @@ export default function RequestDetailsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ── Auth Guard: Redirect unauthenticated users to login ──
+  // ── Fetch Single Request ──
   useEffect(() => {
-    if (!sessionLoading && !session?.user) {
-      router.replace(`/login?callbackUrl=/donation-requests/${requestId}`);
-    }
-  }, [session, sessionLoading, requestId, router]);
-
-  const isLoggedIn = Boolean(session?.user);
-
-  // ── Fetch Single Request (only once the user is logged in) ──
-  useEffect(() => {
-    if (!requestId || !isLoggedIn) return;
+    if (!requestId) return;
 
     const fetchRequestDetails = async () => {
       try {
@@ -52,21 +53,10 @@ export default function RequestDetailsPage() {
     };
 
     fetchRequestDetails();
-  }, [requestId, isLoggedIn]);
-
-  // Prevent rendering page content while verifying authentication
-  // (kept after all hooks so React sees the same hook order on every render)
-  if (sessionLoading || !isLoggedIn) {
-    return null;
-  }
+  }, [requestId]);
 
   // ── Commit Donation Handler ──
   const handleConfirmDonation = async () => {
-    if (!session?.user) {
-      router.push(`/login?callbackUrl=/donation-requests/${requestId}`);
-      return;
-    }
-
     if (session.user.bloodGroup !== requestData.bloodGroup) {
       toast.error(`Your blood group (${session.user.bloodGroup || "unknown"}) does not match this request (${requestData.bloodGroup}).`);
       return;

@@ -6,17 +6,13 @@ import { FiUser, FiUpload } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 // ── Imports ──
-import rawDistricts from "@/lib/asset/data/districts.json";
-import rawUpazilas from "@/lib/asset/data/upazilas.json";
+import { districts as districtsData, upazilasOf } from "@/lib/locations";
 import { authClient } from "@/lib/auth-client"; 
+import { uploadImage } from "@/lib/uploadImage";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-// Extract the actual arrays
-const districtsDataRaw = rawDistricts[2].data;
-const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.name)); 
-const allUpazilasData = rawUpazilas[2].data;
 
 export default function Register() {
 
@@ -31,9 +27,7 @@ export default function Register() {
   
   const [showPassword, setShowPassword] = useState(false);
 
-  const availableUpazilas = selectedDistrictId 
-    ? allUpazilasData.filter(upz => upz.district_id === selectedDistrictId)
-    : [];
+  const availableUpazilas = upazilasOf(selectedDistrictId);
 
   const handleDistrictChange = (e) => {
     setSelectedDistrictId(e.target.value);
@@ -47,27 +41,12 @@ export default function Register() {
 
     setIsUploadingImage(true);
 
-    const imgBBApiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-    const imgBBFormData = new FormData();
-    imgBBFormData.append("image", imageFile);
-
     try {
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgBBApiKey}`, {
-        method: "POST",
-        body: imgBBFormData,
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setAvatarUrl(result.data.url);
-        toast.success("Avatar uploaded.");
-      } else {
-        toast.error("Image upload failed. Please try again.");
-      }
+      setAvatarUrl(await uploadImage(imageFile));
+      toast.success("Avatar uploaded.");
     } catch (error) {
       console.error("ImgBB Upload Error:", error);
-      toast.error("Network error during image upload.");
+      toast.error(error.message);
     } finally {
       setIsUploadingImage(false);
     }
