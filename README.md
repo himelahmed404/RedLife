@@ -5,8 +5,8 @@ blood request, search for donors by blood group, district and upazila, and commi
 request with one click. Volunteers and admins keep the request board moving, and
 supporters can fund the network through Stripe.
 
-- **Live site:** https://YOUR-CLIENT.vercel.app
-- **API server:** https://YOUR-SERVER.vercel.app ([server repo](https://github.com/himelahmed404/RedLife-Server))
+- **Live site:** https://red-life.vercel.app/
+- **API server:** https://redlife-server-three.vercel.app/
 
 ### Test accounts
 
