@@ -5,13 +5,20 @@ import { FiMoreVertical, FiSlash, FiCheckCircle, FiShield, FiUserCheck } from "r
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 import BloodToken from "@/components/DashBoard/BloodToken";
+import Pagination from "@/components/Pagination";
+
+const PAGE_SIZE = 10;
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 export default function AllUsers() {
   const { data: session } = authClient.useSession();
   const [users, setUsers] = useState([]);
+  const [pageInfo, setPageInfo] = useState({ total: 0, totalPages: 1, counts: {} });
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [reloadKey, setReloadKey] = useState(0);
   const [openMenuId, setOpenMenuId] = useState(null);
 
   const menuRef = useRef(null);
@@ -27,38 +34,51 @@ export default function AllUsers() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      const data = await apiFetch("/api/admin/users");
-      setUsers(data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Could not load users.");
-    } finally {
-      setIsLoading(false);
-    }
+  // ── Fetch one page of users (server filters by status) ──
+  useEffect(() => {
+    let ignore = false;
+
+    const params = new URLSearchParams({ page, limit: PAGE_SIZE });
+    if (activeFilter !== "all") params.set("status", activeFilter);
+
+    apiFetch(`/api/admin/users?${params}`)
+      .then((data) => {
+        if (ignore) return;
+        // Blocking the last user on a filtered page can empty it; step back
+        if (data.items.length === 0 && page > data.totalPages) {
+          setPage(data.totalPages);
+          return;
+        }
+        setUsers(data.items);
+        setPageInfo(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Could not load users.");
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeFilter, page, reloadKey]);
+
+  const changeFilter = (key) => {
+    setActiveFilter(key);
+    setPage(1);
+    setIsLoading(true);
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const changePage = (nextPage) => {
+    setPage(nextPage);
+    setIsLoading(true);
+  };
 
   const isBlocked = (user) => user.status === "blocked";
 
-  const counts = {
-    all: users.length,
-    active: users.filter((u) => !isBlocked(u)).length,
-    blocked: users.filter(isBlocked).length,
-  };
-
-  const filteredUsers = users.filter((user) => {
-    const isUserActive = !isBlocked(user);
-    if (activeFilter === "all") return true;
-    if (activeFilter === "active") return isUserActive;
-    if (activeFilter === "blocked") return !isUserActive;
-    return true;
-  });
+  const counts = pageInfo.counts;
+  const filteredUsers = users;
 
   // Action: Toggle Active / Blocked
   const handleToggleStatus = async (userId, currentIsActive) => {
@@ -74,6 +94,7 @@ export default function AllUsers() {
       );
       setOpenMenuId(null);
       toast.success(nextStatus === "active" ? "User unblocked." : "User blocked.");
+      setReloadKey((k) => k + 1);
     } catch (err) {
       toast.error(err.message);
     }
@@ -94,6 +115,7 @@ export default function AllUsers() {
       );
       setOpenMenuId(null);
       toast.success(`Role changed to ${nextRole}.`);
+      setReloadKey((k) => k + 1);
     } catch (err) {
       toast.error(err.message);
     }
@@ -134,7 +156,7 @@ export default function AllUsers() {
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveFilter(tab.key)}
+                onClick={() => changeFilter(tab.key)}
                 className={`flex items-center gap-[6px] h-[32px] px-[12px] rounded-[9px] text-[13px] font-[600] capitalize transition-colors ${
                   isActive
                     ? "bg-[#FDF1F2] text-[#C1121F]"
@@ -147,7 +169,7 @@ export default function AllUsers() {
                     isActive ? "bg-[#C1121F] text-white" : "bg-[#F5F7F9] text-[#5C6675]"
                   }`}
                 >
-                  {counts[tab.key]}
+                  {counts[tab.key] ?? 0}
                 </span>
               </button>
             );
@@ -195,9 +217,11 @@ export default function AllUsers() {
                       <td className="py-[14px] px-[16px] align-middle">
                         <div className="flex items-center gap-[12px]">
                           {user.image ? (
-                            <img
+                            <Image
                               src={user.image}
                               alt={user.name}
+                              width={32}
+                              height={32}
                               className="w-[32px] h-[32px] rounded-full object-cover shrink-0"
                             />
                           ) : (
@@ -243,14 +267,18 @@ export default function AllUsers() {
                         )}
                       </td>
 
-                      {/* Dropdown Menu */}
+                      {/* Dropdown Menu (not on your own row) */}
                       <td className="py-[14px] px-[16px] text-right align-middle relative">
+                        {user._id === session?.user?.id ? (
+                          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-[#A7B0BF]">you</span>
+                        ) : (
                         <button
                           onClick={() => setOpenMenuId(isMenuOpen ? null : user._id)}
                           className="w-[32px] h-[32px] rounded-[8px] inline-flex items-center justify-center text-[#5C6675] hover:text-[#10141C] hover:bg-[#E4E8ED]/50 transition-colors"
                         >
                           <FiMoreVertical className="text-[17px]" />
                         </button>
+                        )}
 
                         {isMenuOpen && (
                           <div
@@ -316,23 +344,13 @@ export default function AllUsers() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-[12px_16px] border-t border-[#E4E8ED] font-mono text-[12px] text-[#5C6675]">
-          <span>showing {filteredUsers.length} of {users.length} users</span>
-          <div className="flex items-center gap-[8px]">
-            <button
-              disabled
-              className="h-[32px] px-[12px] rounded-[8px] border border-[#E4E8ED] bg-white text-[#5C6675] text-[13px] font-[600] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Prev
-            </button>
-            <button
-              disabled
-              className="h-[32px] px-[12px] rounded-[8px] border border-[#E4E8ED] bg-white text-[#5C6675] text-[13px] font-[600] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          totalPages={pageInfo.totalPages}
+          onChange={changePage}
+          summary={`showing ${filteredUsers.length} of ${pageInfo.total} users`}
+          className="p-[12px_16px] border-t border-[#E4E8ED]"
+        />
       </div>
     </div>
   );

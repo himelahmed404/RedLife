@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "@heroui/react";
+import { FaFacebookF, FaXTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa6";
 
 // ── Link Configuration Arrays ──
 const DONATE_LINKS = [
@@ -10,10 +11,18 @@ const DONATE_LINKS = [
 ];
 
 const INFO_LINKS = [
-  { label: "Eligibility checklist", href: "#" },
-  { label: "120-day donation gap", href: "#" },
-  { label: "Safety and screening", href: "#" },
-  { label: "Contact us", href: "#" },
+  { label: "How donation works", href: "/#how-it-works" },
+  { label: "Contact us", href: "/#contact" },
+  { label: "Log in", href: "/login" },
+  { label: "My dashboard", href: "/dashboard" },
+];
+
+// X uses the current logo, not the old Twitter bird
+const SOCIAL_LINKS = [
+  { label: "Facebook", href: "https://www.facebook.com", icon: FaFacebookF },
+  { label: "X", href: "https://x.com", icon: FaXTwitter },
+  { label: "Instagram", href: "https://www.instagram.com", icon: FaInstagram },
+  { label: "LinkedIn", href: "https://www.linkedin.com", icon: FaLinkedinIn },
 ];
 
 export default function Footer() {
@@ -43,6 +52,22 @@ export default function Footer() {
             <p className="font-mono text-[12px] mt-[18px] text-[#69748A]">
               24/7 HELPLINE · 01700-000000
             </p>
+
+            {/* Social Links */}
+            <div className="flex items-center gap-[8px] mt-[18px]">
+              {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`RedLife on ${label}`}
+                  className="w-[36px] h-[36px] rounded-[10px] bg-white/5 border border-white/10 flex items-center justify-center text-[#A7B0BF] hover:text-white hover:bg-[#C1121F] hover:border-[#C1121F] transition-colors"
+                >
+                  <Icon className="text-[15px]" />
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* Column 2: Donate Links */}
@@ -67,7 +92,7 @@ export default function Footer() {
           {/* Column 3: Info Links */}
           <div>
             <p className="font-mono text-[11px] tracking-[0.14em] uppercase text-[#69748A] mb-3">
-              Know before you give
+              Help
             </p>
             <ul className="flex flex-col gap-2">
               {INFO_LINKS.map((link) => (

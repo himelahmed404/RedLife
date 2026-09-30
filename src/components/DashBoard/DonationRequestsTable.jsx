@@ -18,6 +18,7 @@ import StatusConfirmModal from "@/components/DashBoard/StatusConfirmModal";
 export default function DonationRequestsTable({
   requests,
   setRequests,
+  onChanged, // optional: parent refetches (e.g. to refresh page counts)
   isLoading,
   scope = "mine",
   emptyMessage = "No requests found.",
@@ -51,6 +52,7 @@ export default function DonationRequestsTable({
       );
       toast.success(`Request marked as ${statusTarget.newStatus}.`);
       setStatusTarget(null);
+      onChanged?.();
     } catch (err) {
       toast.error("Could not update status: " + err.message);
     } finally {
@@ -69,6 +71,7 @@ export default function DonationRequestsTable({
       prev.map((r) => (r._id === id ? { ...r, ...updatedFields } : r))
     );
     toast.success("Request updated.");
+    onChanged?.();
   };
 
   // ── Full Delete API Handler ──
@@ -77,6 +80,7 @@ export default function DonationRequestsTable({
 
     setRequests((prev) => prev.filter((r) => r._id !== id));
     toast.success("Request deleted.");
+    onChanged?.();
   };
 
   return (

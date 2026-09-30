@@ -14,6 +14,7 @@ export default function DonorHome() {
 
   const [recentRequests, setRecentRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const userId = session?.user?.id;
 
@@ -22,9 +23,9 @@ export default function DonorHome() {
     if (!userId) return;
     let ignore = false;
 
-    apiFetch(`/api/donation-requests/${userId}`)
+    apiFetch(`/api/donation-requests/${userId}?limit=3`)
       .then((data) => {
-        if (!ignore) setRecentRequests(data.slice(0, 3));
+        if (!ignore) setRecentRequests(data.items);
       })
       .catch((err) => console.error("Error fetching recent requests:", err))
       .finally(() => {
@@ -34,7 +35,7 @@ export default function DonorHome() {
     return () => {
       ignore = true;
     };
-  }, [userId]);
+  }, [userId, reloadKey]);
 
   // The recent section is hidden entirely until the donor has made a request
   const showRecent = isLoading || recentRequests.length > 0;
@@ -59,6 +60,7 @@ export default function DonorHome() {
           <DonationRequestsTable
             requests={recentRequests}
             setRequests={setRecentRequests}
+            onChanged={() => setReloadKey((k) => k + 1)}
             isLoading={isLoading}
             scope="mine"
           />

@@ -57,11 +57,6 @@ function RequestDetails() {
 
   // ── Commit Donation Handler ──
   const handleConfirmDonation = async () => {
-    if (session.user.bloodGroup !== requestData.bloodGroup) {
-      toast.error(`Your blood group (${session.user.bloodGroup || "unknown"}) does not match this request (${requestData.bloodGroup}).`);
-      return;
-    }
-
     try {
       setIsSubmitting(true);
 
@@ -235,23 +230,21 @@ function RequestDetails() {
 
                 {isPending && !isOwnRequest && (
                   <>
-                    {session?.user && session?.user?.bloodGroup && session.user.bloodGroup !== requestData.bloodGroup ? (
-                      <div className="mt-3 p-3 rounded-[9px] bg-[#FDF1F2] border border-[#FAD2D4] text-[13px] text-[#C1121F]">
-                        Your profile blood group ({session.user.bloodGroup}) does not match the requested group ({requestData.bloodGroup}).
+                    {/* A mismatch is a heads-up, not a block: the hospital does the final cross-match */}
+                    {session?.user?.bloodGroup && session.user.bloodGroup !== requestData.bloodGroup && (
+                      <div className="mt-3 p-3 rounded-[9px] bg-[#FDF4E7] border border-[#F5DDB8] text-[13px] text-[#B45309]">
+                        Your profile blood group ({session.user.bloodGroup}) is different from the requested group ({requestData.bloodGroup}). Only commit if you know you are a compatible donor.
                       </div>
-                    ) : (
-                      <>
-                        <p className="text-[13.5px] text-[#5C6675] mt-3">
-                          Committing shares your name and email with the requester so they can contact you directly.
-                        </p>
-                        <button
-                          onClick={() => setIsModalOpen(true)}
-                          className="mt-4 flex items-center justify-center w-full bg-[#C1121F] hover:bg-[#7A0A12] text-white font-semibold text-[15px] h-12 rounded-[11px] transition-colors gap-2 cursor-pointer"
-                        >
-                          <FiHeart className="text-[18px]" /> Donate blood
-                        </button>
-                      </>
                     )}
+                    <p className="text-[13.5px] text-[#5C6675] mt-3">
+                      Committing shares your name and email with the requester so they can contact you directly.
+                    </p>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="mt-4 flex items-center justify-center w-full bg-[#C1121F] hover:bg-[#7A0A12] text-white font-semibold text-[15px] h-12 rounded-[11px] transition-colors gap-2 cursor-pointer"
+                    >
+                      <FiHeart className="text-[18px]" /> Donate blood
+                    </button>
                   </>
                 )}
 

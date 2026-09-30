@@ -37,7 +37,7 @@ const STEPS = [
 
 export default function ProcessSteps() {
   return (
-    <section className="bg-[#F5F7F9] border-y border-[#E4E8ED] py-[68px]">
+    <section id="how-it-works" className="bg-[#F5F7F9] border-y border-[#E4E8ED] py-[68px] scroll-mt-[68px]">
       <div className="w-full max-w-[1180px] mx-auto px-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-[44px]">
           

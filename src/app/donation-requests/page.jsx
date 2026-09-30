@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiMapPin, FiCalendar, FiClock, FiEye, FiAlertCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiMapPin, FiCalendar, FiClock, FiEye, FiAlertCircle } from "react-icons/fi";
 import { FaRegHospital } from "react-icons/fa";
 import Pageshell from "@/components/Pageshell";
 import { apiFetch } from "@/lib/api";
+import Pagination from "@/components/Pagination";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -25,41 +26,42 @@ const cardVariants = {
 
 export default function DonationRequests() {
   const [requests, setRequests] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-
+  // Public board: the server returns one page of pending requests
   useEffect(() => {
-    const fetchOpenRequests = async () => {
-      try {
-        setIsLoading(true);
+    let ignore = false;
+
+    apiFetch(`/api/pending-donation-requests?page=${currentPage}&limit=${ITEMS_PER_PAGE}`)
+      .then((data) => {
+        if (ignore) return;
+        setRequests(data.items);
+        setTotal(data.total);
+        setTotalPages(data.totalPages);
         setError(null);
-
-        const data = await apiFetch("/api/all-blood-donation-requests");
-        // Public board only shows open/pending requests
-        const pendingOnly = (Array.isArray(data) ? data : []).filter(
-          (req) => req.status === "pending"
-        );
-        setRequests(pendingOnly);
-      } catch (err) {
+      })
+      .catch((err) => {
         console.error("Open Board fetch error:", err);
-        setError(err.message || "Something went wrong.");
-      } finally {
-        setIsLoading(false);
-      }
+        if (!ignore) setError(err.message || "Something went wrong.");
+      })
+      .finally(() => {
+        if (!ignore) setIsLoading(false);
+      });
+
+    return () => {
+      ignore = true;
     };
+  }, [currentPage]);
 
-    fetchOpenRequests();
-  }, []);
-
-  // ── Pagination Math ──
-  const totalPages = Math.ceil(requests.length / ITEMS_PER_PAGE) || 1;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentRequests = requests.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
+    setIsLoading(true);
     window.scrollTo({ top: 120, behavior: "smooth" });
   };
 
@@ -77,7 +79,7 @@ export default function DonationRequests() {
             Open Board
           </p>
           <h1 className="text-[clamp(23px,3.2vw,33px)] font-[700] text-[#10141C] leading-[1.1] tracking-[-0.02em]">
-            {isLoading ? "Checking active requests..." : `${requests.length} requests are waiting for a donor.`}
+            {isLoading ? "Checking active requests..." : `${total} requests are waiting for a donor.`}
           </h1>
           <p className="text-[15px] text-[#5C6675] mt-[12px] leading-relaxed">
             Only pending requests appear here. The moment someone commits, the request leaves the board so two people never show up for the same bag.
@@ -138,7 +140,7 @@ export default function DonationRequests() {
               animate="visible"
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px]"
             >
-              {currentRequests.map((req) => {
+              {requests.map((req) => {
                 const locationText = req.upazilaName
                   ? `${req.upazilaName}, ${req.districtName}`
                   : req.address || "Location not specified";
@@ -204,49 +206,13 @@ export default function DonationRequests() {
 
             {/* ── Pagination Controls ── */}
             {totalPages > 1 && (
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-[36px] pt-[20px] border-t border-[#E4E8ED] font-mono text-[12px] text-[#5C6675]">
-                <span>
-                  Showing {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, requests.length)} of {requests.length} requests
-                </span>
-
-                <div className="flex items-center gap-[6px]">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="inline-flex items-center gap-[4px] h-[36px] px-[12px] rounded-[9px] border border-[#E4E8ED] bg-white text-[#5C6675] hover:text-[#10141C] hover:border-[#10141C] text-[13px] font-[600] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <FiChevronLeft className="text-[14px]" /> Prev
-                  </button>
-
-                  <div className="flex items-center gap-[4px]">
-                    {[...Array(totalPages)].map((_, i) => {
-                      const pageNum = i + 1;
-                      const isActive = currentPage === pageNum;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-[36px] h-[36px] rounded-[9px] text-[13px] font-[600] transition-colors ${
-                            isActive
-                              ? "bg-[#C1121F] text-white"
-                              : "border border-[#E4E8ED] bg-white text-[#5C6675] hover:text-[#10141C] hover:bg-[#F5F7F9]"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="inline-flex items-center gap-[4px] h-[36px] px-[12px] rounded-[9px] border border-[#E4E8ED] bg-white text-[#5C6675] hover:text-[#10141C] hover:border-[#10141C] text-[13px] font-[600] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Next <FiChevronRight className="text-[14px]" />
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                page={currentPage}
+                totalPages={totalPages}
+                onChange={handlePageChange}
+                summary={`Showing ${startIndex + 1}–${Math.min(startIndex + ITEMS_PER_PAGE, total)} of ${total} requests`}
+                className="mt-[36px] pt-[20px] border-t border-[#E4E8ED]"
+              />
             )}
           </>
         )}

@@ -10,6 +10,7 @@ import {
 } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client"; 
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 const ALL_ROLES = ["donor", "volunteer", "admin"];
 
@@ -123,7 +124,7 @@ export default function DashboardLayout({ children, session }) {
         <div className="mt-auto p-[8px] lg:p-[12px]">
           <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-[10px] p-[8px] lg:p-[10px] rounded-[12px] bg-[#1B2230]">
             {session?.user?.image ? (
-                <img src={session.user.image} alt="Avatar" className="w-[30px] lg:w-[36px] h-[30px] lg:h-[36px] rounded-full object-cover shrink-0" />
+                <Image src={session.user.image} alt="Avatar" width={36} height={36} className="w-[30px] lg:w-[36px] h-[30px] lg:h-[36px] rounded-full object-cover shrink-0" />
             ) : (
                 <div className="w-[30px] lg:w-[36px] h-[30px] lg:h-[36px] rounded-full bg-[#10141C] text-white flex items-center justify-center text-[11px] lg:text-[13px] font-bold shrink-0">
                     {getInitials(session?.user?.name)}

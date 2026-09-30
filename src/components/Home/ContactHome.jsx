@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 export default function ContactHome() {
   return (
-    <section className="w-full max-w-[1180px] mx-auto mt-20 px-5 mb-20">
+    <section id="contact" className="w-full max-w-[1180px] mx-auto mt-20 px-5 mb-20 scroll-mt-[88px]">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
