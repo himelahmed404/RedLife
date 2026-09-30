@@ -67,7 +67,7 @@ export default function SearchDonors() {
       setIsLoading(true);
       setError(null);
 
-      const data = await apiFetch(`/api/donors/search?${params.toString()}`);
+      const data = await apiFetch(`/api/donors/search?${params.toString()}`, { auth: false });
       setDonors(Array.isArray(data) ? data : []);
       setSearchedFilters({ bloodGroup, district: districtObj?.name, upazila: upazilaObj?.name });
       setHasSearched(true);

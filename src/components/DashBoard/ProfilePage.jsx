@@ -96,7 +96,6 @@ function ProfileForm({ user, refetch }) {
       await apiFetch("/api/profile/update-profile", {
         method: "POST",
         body: {
-          userId: user.id,
           name: formData.name,
           image: formData.avatarUrl,
           number: formData.number,

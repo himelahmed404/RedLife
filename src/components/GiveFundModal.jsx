@@ -10,7 +10,7 @@ const PRESET_AMOUNTS = [300, 500, 1000, 2500];
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 500000;
 
-export default function GiveFundModal({ isOpen, onClose, userId }) {
+export default function GiveFundModal({ isOpen, onClose }) {
     const [amount, setAmount] = useState("500");
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -30,7 +30,7 @@ export default function GiveFundModal({ isOpen, onClose, userId }) {
             setIsProcessing(true);
             const data = await apiFetch("/api/funds/create-checkout-session", {
                 method: "POST",
-                body: { userId, amount: value },
+                body: { amount: value },
             });
             if (!data?.url) {
                 throw new Error("Could not start payment.");

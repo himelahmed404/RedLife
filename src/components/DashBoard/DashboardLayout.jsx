@@ -8,7 +8,8 @@ import {
   FiMonitor, FiDollarSign, FiLogOut, 
   FiHome, FiDroplet
 } from "react-icons/fi";
-import { authClient } from "@/lib/auth-client"; 
+import { authClient } from "@/lib/auth-client";
+import { clearApiToken } from "@/lib/api"; 
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -37,6 +38,7 @@ export default function DashboardLayout({ children, session }) {
 
   const handleLogout = async () => {
     await authClient.signOut();
+    clearApiToken();
     toast.success("Logged out.");
     router.replace("/login");
   };

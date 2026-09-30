@@ -23,7 +23,7 @@ export default function DonorHome() {
     if (!userId) return;
     let ignore = false;
 
-    apiFetch(`/api/donation-requests/${userId}?limit=3`)
+    apiFetch("/api/my-donation-requests?limit=3")
       .then((data) => {
         if (!ignore) setRecentRequests(data.items);
       })

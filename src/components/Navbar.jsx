@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { FiGrid, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
+import { clearApiToken } from "@/lib/api";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -44,6 +45,7 @@ export default function AppNavbar() {
         setIsDropdownOpen(false);
         setIsMobileOpen(false);
         await authClient.signOut();
+        clearApiToken();
         toast.success("Logged out.");
         router.push("/");
     };

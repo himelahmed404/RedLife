@@ -23,7 +23,7 @@ export default function MyDonations() {
     const fetchDonations = async () => {
       try {
         setIsLoading(true);
-        const data = await apiFetch(`/api/my-donations/${session.user.id}`);
+        const data = await apiFetch("/api/my-donations");
         setDonations(data);
       } catch (err) {
         console.error("Fetch donations error:", err);

@@ -7,7 +7,6 @@ import { FiCreditCard, FiAlertCircle, FiChevronLeft, FiChevronRight } from "reac
 import Pageshell from "@/components/Pageshell";
 import PrivateRoute from "@/components/PrivateRoute";
 import GiveFundModal from "@/components/GiveFundModal";
-import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
 
 const ITEMS_PER_PAGE = 10;
@@ -35,7 +34,6 @@ export default function Funding() {
 }
 
 function FundingContent() {
-  const { data: session } = authClient.useSession();
 
   const [funds, setFunds] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -244,7 +242,6 @@ function FundingContent() {
       <GiveFundModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        userId={session?.user?.id}
       />
     </Pageshell>
   );

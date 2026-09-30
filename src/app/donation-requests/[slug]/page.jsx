@@ -60,22 +60,17 @@ function RequestDetails() {
     try {
       setIsSubmitting(true);
 
-      const payload = {
-        status: "inprogress",
-        donorName: session.user.name,
-        donorEmail: session.user.email,
-        donorId: session.user.id,
-      };
-
-      await apiFetch(`/api/donation-requests/status/${requestId}`, {
+      // The server records the logged-in user as the donor
+      const updated = await apiFetch(`/api/donation-requests/status/${requestId}`, {
         method: "PATCH",
-        body: payload,
+        body: { status: "inprogress" },
       });
 
-      // Update state locally
+      // Update state locally with what the server saved (status + donor details)
+      const { message, ...savedFields } = updated;
       setRequestData((prev) => ({
         ...prev,
-        ...payload,
+        ...savedFields,
       }));
 
       setIsModalOpen(false);

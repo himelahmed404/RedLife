@@ -36,7 +36,7 @@ export default function DonationRequests() {
   useEffect(() => {
     let ignore = false;
 
-    apiFetch(`/api/pending-donation-requests?page=${currentPage}&limit=${ITEMS_PER_PAGE}`)
+    apiFetch(`/api/pending-donation-requests?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, { auth: false })
       .then((data) => {
         if (ignore) return;
         setRequests(data.items);

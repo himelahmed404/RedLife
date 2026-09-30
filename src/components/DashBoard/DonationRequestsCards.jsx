@@ -26,7 +26,7 @@ export default function DonationRequestsCards({ scope = "mine", eyebrow, title }
   const userId = session?.user?.id;
   const endpoint = scope === "all"
     ? "/api/all-blood-donation-requests"
-    : `/api/donation-requests/${userId}`;
+    : "/api/my-donation-requests";
 
   // ── Fetch one page (server does the filtering and paging) ──
   useEffect(() => {

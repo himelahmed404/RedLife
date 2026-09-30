@@ -49,11 +49,7 @@ export default function CreateDonationRequest() {
             ...data,
             districtName: districtObj?.name || "",
             upazilaName: upazilaObj?.name || "",
-            requesterName: session?.user?.name,
-            requesterEmail: session?.user?.email,
-            userId: session?.user?.id,
-            donorId: null, // Initially no donor assigned
-            status: "pending"
+            // Requester, status (pending) and date are set by the server from the login token
         };
 
         try {
