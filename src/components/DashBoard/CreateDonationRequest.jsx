@@ -16,13 +16,6 @@ const districtsDataRaw = rawDistricts[2].data;
 const districtsData = districtsDataRaw.sort((a, b) => a.name.localeCompare(b.name));
 const allUpazilasData = rawUpazilas[2].data;
 
-// "My donation requests" route differs per role (donor uses the plural folder)
-const myRequestsPaths = {
-    admin: "/dashboard/admin/my-donation-request",
-    volunteer: "/dashboard/volunteer/my-donation-request",
-    donor: "/dashboard/donor/my-donation-requests",
-};
-
 export default function CreateDonationRequest() {
     const router = useRouter();
     const { data: session } = authClient.useSession();
@@ -76,10 +69,7 @@ export default function CreateDonationRequest() {
             });
 
             toast.success("Request posted to the board successfully!");
-            const userRole = String(session?.user?.role || "donor").toLowerCase();
-            router.push(myRequestsPaths[userRole] || myRequestsPaths.donor);
-
-            // Optional: Redirect or clear form here
+            router.push("/dashboard/my-donation-requests");
         } catch (error) {
             console.error(error);
             toast.error(error.message || "Failed to post request.");

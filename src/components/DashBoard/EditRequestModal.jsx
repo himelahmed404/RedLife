@@ -1,29 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
 import toast from "react-hot-toast";
 
+// The parent keys this modal by request id, so the form starts fresh for each request
 export default function EditRequestModal({ isOpen, onClose, request, onSave }) {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(() => ({
+    recipientName: request?.recipientName || "",
+    bloodGroup: request?.bloodGroup || "A+",
+    hospitalName: request?.hospitalName || "",
+    districtName: request?.districtName || "",
+    upazilaName: request?.upazilaName || "",
+    address: request?.address || "",
+    donationDate: request?.donationDate || "",
+    donationTime: request?.donationTime || "",
+    message: request?.message || "",
+  }));
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (request) {
-      setFormData({
-        recipientName: request.recipientName || "",
-        bloodGroup: request.bloodGroup || "A+",
-        hospitalName: request.hospitalName || "",
-        districtName: request.districtName || "",
-        upazilaName: request.upazilaName || "",
-        address: request.address || "",
-        donationDate: request.donationDate || "",
-        donationTime: request.donationTime || "",
-        message: request.message || "",
-      });
-    }
-  }, [request]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

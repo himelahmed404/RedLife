@@ -11,6 +11,24 @@ import {
 import { authClient } from "@/lib/auth-client"; 
 import toast from "react-hot-toast";
 
+const ALL_ROLES = ["donor", "volunteer", "admin"];
+
+// One list for every role; each link says who can see it
+const WORKSPACE_LINKS = [
+  { label: "Dashboard", shortLabel: "Home", href: "/dashboard", icon: FiGrid, roles: ALL_ROLES },
+  { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/my-donation-requests", icon: FiHome, roles: ALL_ROLES },
+  { label: "Create donation request", shortLabel: "Create", href: "/dashboard/create-donation-request", icon: FiPlusCircle, roles: ALL_ROLES },
+  { label: "My donations", shortLabel: "Donated", href: "/dashboard/my-donations", icon: FiDroplet, roles: ALL_ROLES },
+  { label: "All users", shortLabel: "Users", href: "/dashboard/all-users", icon: FiUsers, roles: ["admin"] },
+  { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/all-blood-donation-request", icon: FiList, roles: ["admin", "volunteer"] },
+  { label: "Profile", shortLabel: "Profile", href: "/dashboard/profile", icon: FiUser, roles: ALL_ROLES },
+];
+
+const PUBLIC_LINKS = [
+  { label: "Donation board", shortLabel: "Board", href: "/donation-requests", icon: FiMonitor },
+  { label: "Funding", shortLabel: "Funds", href: "/funding", icon: FiDollarSign },
+];
+
 // Receive session as a prop from layout.jsx (prevents duplicate session fetches & loops)
 export default function DashboardLayout({ children, session }) {
   const pathname = usePathname();
@@ -27,52 +45,10 @@ export default function DashboardLayout({ children, session }) {
     return name.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase();
   };
 
-  // Safe normalized role
-  const rawRole = session?.user?.role || "donor";
-  const userRole = String(rawRole).toLowerCase();
+  const userRole = session?.user?.role || "donor";
 
-  const adminLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/admin", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/admin/my-donation-request", icon: FiHome },
-    { label: "Create donation request", shortLabel: "Create", href: "/dashboard/admin/create-donation-request", icon: FiPlusCircle },
-    { label: "My donations", shortLabel: "Donated", href: "/dashboard/admin/my-donations", icon: FiDroplet },
-    { label: "All users", shortLabel: "Users", href: "/dashboard/admin/all-users", icon: FiUsers },
-    { label: "Public donation requests", shortLabel: "All requests", href: "/dashboard/admin/all-blood-donation-request", icon: FiList },
-    { label: "Profile", shortLabel: "Profile", href: "/dashboard/admin/profile", icon: FiUser },
-  ];
-
-  const volunteerLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/volunteer", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/volunteer/my-donation-request", icon: FiHome },
-    { label: "Create donation request", shortLabel: "Create", href: "/dashboard/volunteer/create-donation-request", icon: FiPlusCircle },
-    { label: "My donations", shortLabel: "Donated", href: "/dashboard/volunteer/my-donations", icon: FiDroplet },
-    { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/volunteer/all-blood-donation-request", icon: FiList },
-    { label: "Profile", shortLabel: "Profile", href: "/dashboard/volunteer/profile", icon: FiUser },
-  ];
-
-  const donorLinks = [
-    { label: "Dashboard", shortLabel: "Home", href: "/dashboard/donor", icon: FiGrid },
-    { label: "My donation requests", shortLabel: "My requests", href: "/dashboard/donor/my-donation-requests", icon: FiHome },
-    { label: "Create donation request", shortLabel: "Create", href: "/dashboard/donor/create-donation-request", icon: FiPlusCircle },
-    { label: "My donations", shortLabel: "Donated", href: "/dashboard/donor/my-donations", icon: FiDroplet },
-    { label: "Profile", shortLabel: "Profile", href: "/dashboard/donor/profile", icon: FiUser },
-  ];
-
-  const publicLinks = [
-    { label: "Donation board", shortLabel: "Board", href: "/donation-requests", icon: FiMonitor },
-    { label: "Funding", shortLabel: "Funds", href: "/funding", icon: FiDollarSign },
-  ];
-
-  let workspaceLinks = donorLinks;
-  let workspaceTitle = "donor workspace";
-
-  if (userRole === "admin") {
-    workspaceLinks = adminLinks;
-    workspaceTitle = "admin workspace";
-  } else if (userRole === "volunteer") {
-    workspaceLinks = volunteerLinks;
-    workspaceTitle = "volunteer workspace";
-  }
+  const workspaceLinks = WORKSPACE_LINKS.filter((link) => link.roles.includes(userRole));
+  const workspaceTitle = `${userRole} workspace`;
 
   return (
     <div className="flex min-h-screen bg-[#F5F7F9] text-[#10141C] font-sans">
@@ -127,7 +103,7 @@ export default function DashboardLayout({ children, session }) {
           <span className="block lg:hidden">Site</span>
         </p>
         <nav className="flex flex-col gap-[4px] px-[8px] lg:px-[10px]">
-          {publicLinks.map((link) => {
+          {PUBLIC_LINKS.map((link) => {
             const Icon = link.icon;
             return (
               <Link 

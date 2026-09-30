@@ -4,9 +4,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { FiMoreVertical, FiSlash, FiCheckCircle, FiShield, FiUserCheck } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
+import BloodToken from "@/components/DashBoard/BloodToken";
 import toast from "react-hot-toast";
 
-export default function AllUsersPage() {
+export default function AllUsers() {
   const { data: session } = authClient.useSession();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -217,9 +218,7 @@ export default function AllUsersPage() {
 
                       {/* Blood Group */}
                       <td className="py-[14px] px-[16px] align-middle">
-                        <span className="inline-flex flex-col items-center justify-center border-[1.5px] border-[#C1121F] rounded-[8px] bg-white text-[#C1121F] font-mono font-[600] relative overflow-hidden min-w-[42px] h-[30px] text-[13px] pt-[2px] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[3.5px] before:bg-[#C1121F]">
-                          {user.bloodGroup || "—"}
-                        </span>
+                        <BloodToken group={user.bloodGroup} />
                       </td>
 
                       {/* Role Pill */}

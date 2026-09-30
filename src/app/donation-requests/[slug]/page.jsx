@@ -7,6 +7,7 @@ import { FiArrowLeft, FiHeart, FiX, FiAlertCircle } from "react-icons/fi";
 import Pageshell from "@/components/Pageshell";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
+import StatusChip from "@/components/DashBoard/StatusChip";
 import toast from "react-hot-toast";
 
 export default function RequestDetailsPage() {
@@ -102,41 +103,6 @@ export default function RequestDetailsPage() {
   };
 
 
-  const getStatusChip = (status) => {
-    switch (status) {
-      case "pending":
-        return (
-          <span className="inline-flex items-center gap-1.5 h-6.5 px-2.5 rounded-full font-mono text-[11px] font-semibold uppercase tracking-wider text-[#B45309] bg-[#FDF4E7]">
-            <i className="w-1.5 h-1.5 rounded-full bg-current"></i>
-            pending
-          </span>
-        );
-      case "inprogress":
-        return (
-          <span className="inline-flex items-center gap-1.5 h-6.5 px-2.5 rounded-full font-mono text-[11px] font-semibold uppercase tracking-wider text-[#0E7490] bg-[#EAF7FA]">
-            <i className="w-1.5 h-1.5 rounded-full bg-current"></i>
-            in progress
-          </span>
-        );
-      case "done":
-        return (
-          <span className="inline-flex items-center gap-1.5 h-6.5 px-2.5 rounded-full font-mono text-[11px] font-semibold uppercase tracking-wider text-[#15803D] bg-[#EDF7F0]">
-            <i className="w-1.5 h-1.5 rounded-full bg-current"></i>
-            done
-          </span>
-        );
-      case "canceled":
-        return (
-          <span className="inline-flex items-center gap-1.5 h-6.5 px-2.5 rounded-full font-mono text-[11px] font-semibold uppercase tracking-wider text-[#64748B] bg-[#F1F5F9]">
-            <i className="w-1.5 h-1.5 rounded-full bg-current"></i>
-            canceled
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   const isPending = requestData?.status === "pending";
   const isOwnRequest =
     session?.user?.id &&
@@ -188,7 +154,7 @@ export default function RequestDetailsPage() {
                     {requestData.recipientName}
                   </h2>
                   <div className="mt-3">
-                    {getStatusChip(requestData.status)}
+                    <StatusChip status={requestData.status} label={requestData.status === "inprogress" ? "in progress" : undefined} />
                   </div>
                 </div>
 

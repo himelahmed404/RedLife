@@ -134,7 +134,7 @@ export default function AppNavbar() {
                                         <div className="h-[1px] bg-[#E4E8ED] my-[4px] mx-[4px]"></div>
 
                                         <Link
-                                            href={`/dashboard/${session?.user?.role || "donor"}`}
+                                            href="/dashboard"
                                             className="flex items-center gap-[10px] px-[10px] py-[9px] text-[13.5px] text-[#10141C] hover:bg-[#F5F7F9] rounded-[8px] transition-colors cursor-pointer w-full"
                                             onClick={() => setIsDropdownOpen(false)}
                                         >

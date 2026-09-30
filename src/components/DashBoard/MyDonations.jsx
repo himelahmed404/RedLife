@@ -5,6 +5,8 @@ import Link from "next/link";
 import { FiEye, FiDroplet, FiCheckCircle, FiClock } from "react-icons/fi";
 import { authClient } from "@/lib/auth-client";
 import { apiFetch } from "@/lib/api";
+import StatusChip from "@/components/DashBoard/StatusChip";
+import BloodToken from "@/components/DashBoard/BloodToken";
 import toast from "react-hot-toast";
 
 export default function MyDonations() {
@@ -46,39 +48,6 @@ export default function MyDonations() {
     activeFilter === "all"
       ? donations
       : donations.filter((d) => d.status === activeFilter);
-
-  const getStatusChip = (status) => {
-    switch (status) {
-      case "inprogress":
-        return (
-          <span className="inline-flex items-center gap-[6px] h-[24px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#0E7490] bg-[#EAF7FA]">
-            <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
-            inprogress
-          </span>
-        );
-      case "done":
-        return (
-          <span className="inline-flex items-center gap-[6px] h-[24px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#15803D] bg-[#EDF7F0]">
-            <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
-            donated
-          </span>
-        );
-      case "canceled":
-        return (
-          <span className="inline-flex items-center gap-[6px] h-[24px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#64748B] bg-[#F1F5F9]">
-            <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
-            canceled
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-[6px] h-[24px] px-[10px] rounded-full font-mono text-[11px] font-[600] uppercase tracking-[0.05em] text-[#B45309] bg-[#FDF4E7]">
-            <i className="w-[6px] h-[6px] rounded-full bg-current"></i>
-            {status || "pending"}
-          </span>
-        );
-    }
-  };
 
   const stats = [
     { label: "Total commitments", value: counts.all, icon: FiDroplet, color: "text-[#C1121F] bg-[#FDF1F2]" },
@@ -213,14 +182,12 @@ export default function MyDonations() {
 
                     {/* Blood Group Token */}
                     <td className="py-[14px] px-[16px] align-middle">
-                      <span className="inline-flex flex-col items-center justify-center border-[1.5px] border-[#C1121F] rounded-[8px] bg-white text-[#C1121F] font-mono font-[600] relative overflow-hidden min-w-[42px] h-[32px] text-[13px] pt-[3px] before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[3.5px] before:bg-[#C1121F]">
-                        {donation.bloodGroup}
-                      </span>
+                      <BloodToken group={donation.bloodGroup} />
                     </td>
 
                     {/* Status */}
                     <td className="py-[14px] px-[16px] align-middle">
-                      {getStatusChip(donation.status)}
+                      <StatusChip status={donation.status} label={donation.status === "done" ? "donated" : undefined} />
                     </td>
 
                     {/* Requester */}
