@@ -12,7 +12,7 @@ supporters can fund the network through Stripe.
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | `ADMIN_EMAIL` | `ADMIN_PASSWORD` |
+| Admin | `a@a.com` | `asdfasdf` |
 
 New sign-ups are **donors**. An admin can promote users to volunteer or admin from
 *Dashboard → All users*, or a user can be made admin by editing `role` in the database.
