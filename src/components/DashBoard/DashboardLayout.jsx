@@ -21,7 +21,7 @@ const WORKSPACE_LINKS = [
   { label: "Create donation request", shortLabel: "Create", href: "/dashboard/create-donation-request", icon: FiPlusCircle, roles: ALL_ROLES },
   { label: "My donations", shortLabel: "Donated", href: "/dashboard/my-donations", icon: FiDroplet, roles: ALL_ROLES },
   { label: "All users", shortLabel: "Users", href: "/dashboard/all-users", icon: FiUsers, roles: ["admin"] },
-  { label: "All blood donation requests", shortLabel: "All requests", href: "/dashboard/all-blood-donation-request", icon: FiList, roles: ["admin", "volunteer"] },
+  { label: "All donation requests", shortLabel: "All requests", href: "/dashboard/all-blood-donation-request", icon: FiList, roles: ["admin", "volunteer"] },
   { label: "Profile", shortLabel: "Profile", href: "/dashboard/profile", icon: FiUser, roles: ALL_ROLES },
 ];
 

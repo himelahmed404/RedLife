@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FiSearch, FiMapPin, FiMail, FiPhone, FiAlertCircle, FiUserX } from "react-icons/fi";
+import { FiSearch, FiMapPin, FiMail, FiPhone, FiAlertCircle, FiUserX, FiDownload } from "react-icons/fi";
+import toast from "react-hot-toast";
 import Pageshell from "@/components/Pageshell";
 import { apiFetch } from "@/lib/api";
+import { downloadDonorsPdf } from "@/lib/donorsPdf";
 
 // ── Imports for Location Data ──
 import { districts as districtsData, upazilasOf } from "@/lib/locations";
@@ -37,6 +39,9 @@ export default function SearchDonors() {
   const [hasSearched, setHasSearched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  // Filters of the search that produced `donors` (the form may change afterwards)
+  const [searchedFilters, setSearchedFilters] = useState({});
+  const [isExporting, setIsExporting] = useState(false);
 
 
   const availableUpazilas = upazilasOf(selectedDistrictId);
@@ -64,12 +69,25 @@ export default function SearchDonors() {
 
       const data = await apiFetch(`/api/donors/search?${params.toString()}`);
       setDonors(Array.isArray(data) ? data : []);
+      setSearchedFilters({ bloodGroup, district: districtObj?.name, upazila: upazilaObj?.name });
       setHasSearched(true);
     } catch (err) {
       console.error("Donor search error:", err);
       setError(err.message || "Something went wrong.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsExporting(true);
+      await downloadDonorsPdf(donors, searchedFilters);
+    } catch (err) {
+      console.error("PDF export error:", err);
+      toast.error("Could not create the PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -226,9 +244,20 @@ export default function SearchDonors() {
           {/* Results Grid */}
           {!isLoading && !error && hasSearched && donors.length > 0 && (
             <>
-              <p className="font-mono text-[12px] text-[#5C6675] mb-[14px]">
-                {donors.length} {donors.length === 1 ? "donor" : "donors"} found
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-[12px] mb-[14px]">
+                <p className="font-mono text-[12px] text-[#5C6675]">
+                  {donors.length} {donors.length === 1 ? "donor" : "donors"} found
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isExporting}
+                  className="inline-flex items-center gap-[8px] h-[38px] px-[14px] rounded-[10px] border border-[#E4E8ED] bg-white text-[#10141C] hover:border-[#10141C] hover:bg-[#F5F7F9] font-[600] text-[13.5px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiDownload className="text-[15px]" />
+                  {isExporting ? "Preparing PDF..." : "Download PDF"}
+                </button>
+              </div>
 
               <motion.div
                 variants={containerVariants}
