@@ -28,7 +28,7 @@ export default function DonationRequestsCards({ personalOnly = false }) {
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const rawRole = session?.user?.Role || session?.user?.role || "donor";
+  const rawRole = session?.user?.role || "donor";
   const userRole = String(rawRole).toLowerCase();
   const isAdminOrVolunteer = userRole === "admin" || userRole === "volunteer";
   const isAdminButPersonal = personalOnly;

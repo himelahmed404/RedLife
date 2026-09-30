@@ -28,7 +28,7 @@ export default function DashboardLayout({ children, session }) {
   };
 
   // Safe normalized role
-  const rawRole = session?.user?.Role || session?.user?.role || "donor";
+  const rawRole = session?.user?.role || "donor";
   const userRole = String(rawRole).toLowerCase();
 
   const adminLinks = [

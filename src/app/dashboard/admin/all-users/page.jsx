@@ -43,15 +43,16 @@ export default function AllUsersPage() {
     fetchUsers();
   }, []);
 
-  // Filter tabs count based on boolean isActive
+  const isBlocked = (user) => user.status === "blocked";
+
   const counts = {
     all: users.length,
-    active: users.filter((u) => u.isActive !== false).length,
-    blocked: users.filter((u) => u.isActive === false).length,
+    active: users.filter((u) => !isBlocked(u)).length,
+    blocked: users.filter(isBlocked).length,
   };
 
   const filteredUsers = users.filter((user) => {
-    const isUserActive = user.isActive !== false;
+    const isUserActive = !isBlocked(user);
     if (activeFilter === "all") return true;
     if (activeFilter === "active") return isUserActive;
     if (activeFilter === "blocked") return !isUserActive;
@@ -60,18 +61,18 @@ export default function AllUsersPage() {
 
   // Action: Toggle Active / Blocked
   const handleToggleStatus = async (userId, currentIsActive) => {
-    const nextIsActive = !currentIsActive;
+    const nextStatus = currentIsActive ? "blocked" : "active";
     try {
       await apiFetch(`/api/admin/users/${userId}/status`, {
         method: "PATCH",
-        body: { isActive: nextIsActive },
+        body: { status: nextStatus },
       });
 
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, isActive: nextIsActive } : u))
+        prev.map((u) => (u._id === userId ? { ...u, status: nextStatus } : u))
       );
       setOpenMenuId(null);
-      toast.success(nextIsActive ? "User unblocked." : "User blocked.");
+      toast.success(nextStatus === "active" ? "User unblocked." : "User blocked.");
     } catch (err) {
       toast.error(err.message);
     }
@@ -87,7 +88,7 @@ export default function AllUsersPage() {
 
       setUsers((prev) =>
         prev.map((u) =>
-          u._id === userId ? { ...u, Role: nextRole, role: nextRole } : u
+          u._id === userId ? { ...u, role: nextRole } : u
         )
       );
       setOpenMenuId(null);
@@ -180,9 +181,8 @@ export default function AllUsersPage() {
                 </tr>
               ) : (
                 filteredUsers.map((user) => {
-                  const isUserActive = user.isActive !== false;
-                  // Handle both 'Role' (from MongoDB image) and 'role'
-                  const displayRole = (user.Role || user.role || "donor").toUpperCase();
+                  const isUserActive = !isBlocked(user);
+                  const displayRole = (user.role || "donor").toUpperCase();
                   const isMenuOpen = openMenuId === user._id;
 
                   return (

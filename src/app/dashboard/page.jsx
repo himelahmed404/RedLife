@@ -12,7 +12,7 @@ export default function DashboardIndex() {
 
   useEffect(() => {
     if (!session?.user) return;
-    const role = String(session.user.Role || session.user.role || "donor").toLowerCase();
+    const role = String(session.user.role || "donor").toLowerCase();
     router.replace(`/dashboard/${role}`);
   }, [session, router]);
 

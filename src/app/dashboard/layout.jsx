@@ -12,7 +12,7 @@ export default function Layout({ children }) {
   
   const isRedirecting = useRef(false);
 
-  const rawRole = session?.user?.Role || session?.user?.role || "donor";
+  const rawRole = session?.user?.role || "donor";
   const currentRole = String(rawRole).toLowerCase();
 
   useEffect(() => {

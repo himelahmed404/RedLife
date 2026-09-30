@@ -32,7 +32,7 @@ export default function CreateDonationRequest() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Only active users can create donation requests
-    const isBlocked = session?.user?.isActive === false;
+    const isBlocked = session?.user?.status === "blocked";
 
     const availableUpazilas = selectedDistrictId
         ? allUpazilasData.filter(upz => upz.district_id === selectedDistrictId)
@@ -76,7 +76,7 @@ export default function CreateDonationRequest() {
             });
 
             toast.success("Request posted to the board successfully!");
-            const userRole = String(session?.user?.Role || session?.user?.role || "donor").toLowerCase();
+            const userRole = String(session?.user?.role || "donor").toLowerCase();
             router.push(myRequestsPaths[userRole] || myRequestsPaths.donor);
 
             // Optional: Redirect or clear form here

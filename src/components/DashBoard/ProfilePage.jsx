@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Account status (admin can block a user from the All users page)
-  const isBlocked = session?.user?.isActive === false;
+  const isBlocked = session?.user?.status === "blocked";
 
   const [formData, setFormData] = useState({
     name: "",

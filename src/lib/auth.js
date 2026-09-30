@@ -12,17 +12,20 @@ export const auth = betterAuth({
   }),
   user: {
     additionalFields: {
-      Role: {
+      // role and status are set by the server/admin only, never from the signup form
+      role: {
         type: "string",
-        defaultValue: "donor",
+        defaultValue: "donor", // "donor" | "volunteer" | "admin"
+        input: false,
+      },
+      status: {
+        type: "string",
+        defaultValue: "active", // "active" | "blocked"
+        input: false,
       },
       number: {
         type: "string",
         defaultValue: "",
-      },
-      isActive: {
-        type: "boolean",
-        defaultValue: true,
       },
       bloodGroup: {
         type: "string",
